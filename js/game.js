@@ -187,7 +187,7 @@ for (mapFragment of map) {
     document.querySelector('main').appendChild(htmlMapFragment)
 }
 
-const socket = io('ws://localhost:3001')
+const socket = io('ws://5.tcp.eu.ngrok.io:19785')
 
 var pressedKeys = {
     'KeyW': false,
