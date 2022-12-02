@@ -1,0 +1,116 @@
+body {
+    height: 100vh;
+    width: 100vw;
+    margin: 0;
+    padding: 0;
+    display: grid;
+    place-items: center;
+    position: relative;
+    background-color: black;
+    overflow: hidden;
+}
+
+main {
+    background-image: url('../svg/bg.svg');
+    background-size: 50px;
+    background-repeat: repeat;
+    width: 4300px;
+    height: 2900px;
+    position: fixed;
+    top: calc(50vh - 25px);
+    left: calc(50vw - 25px);
+}
+
+.name {
+    position: absolute;
+    top: -30px;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    font-family: 'Roboto', sans-serif;
+    font-size: 10px;
+    color: white;
+    text-align: center;
+    text-transform: uppercase;
+    font-weight: 900;
+    background-color: rgba(0, 0, 0, 0.35);
+}
+
+.character {
+    height: 50px;
+    width: 50px;
+    z-index: 3;
+    position: relative;
+}
+
+.main-character {
+    position: fixed;
+    top: calc(50vh - 25px);
+    left: calc(50vw - 25px);
+}
+
+.main-character > .shadow {
+    position: absolute;
+    top: calc(25px - 250px);
+    left: calc(25px - 250px);
+    width: 500px;
+    height: 500px;
+    box-shadow: 0 0 0 100000px rgba(0, 0, 0, 0.219);
+    background: radial-gradient(ellipse at center, rgba(0, 0, 0, 0.219) 0%, rgba(0, 0, 0, 0) 100%);
+    border-radius: 9999px;
+    z-index: 1;
+}
+
+.other-character {
+    position: absolute;
+    top: 0;
+    left: 0;
+}
+
+.character > img {
+    width: 55px;
+    height: 64px;
+    position: absolute;
+    left: -5px;
+    bottom: 0;
+}
+
+.map-fragment {
+    background-image: url('../svg/roadBlock.svg');
+    background-repeat: repeat;
+    background-size: 50px;
+    position: absolute;
+}
+
+#landingForm {
+    width: 600px;
+    height: 300px;
+    background-color: rgb(148, 191, 159);
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    gap: 30px;
+    z-index: 3;
+    border-radius: 5px;
+}
+
+#landingForm > input {
+    width: 70%;
+    height: 50px;
+    background-color: white;
+    border: none;
+    border-radius: 5px;
+    padding: 0 10px;
+    font-size: 20px;
+}
+
+#landingForm > button {
+    width: 40%;
+    height: 50px;
+    background-color: white;
+    border: none;
+    border-radius: 5px;
+    padding: 0 10px;
+    font-size: 20px;
+    cursor: pointer;
+}
