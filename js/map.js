@@ -22,7 +22,7 @@ class GameMap {
             document.querySelector('main').appendChild(htmlMapFragment)
         }
 
-        for (const building of map.buildings) {
+        for (const building of this.buildings) {
             const htmlBuilding = document.createElement('img')
             htmlBuilding.src = building.link
             htmlBuilding.style.top = building.y + 'px'

@@ -3,7 +3,7 @@ class Socket {
 
     /**
      * @param { WebSocket } ws 
-     * @returns {void}
+     * @returns {Socket}
      */
     constructor(ws) {
         if(this.instance) return this.instance;
@@ -11,21 +11,22 @@ class Socket {
         this.ws = ws;
         this.functions = new Map();
         this.ws.onmessage = (event) => {
-            const data = JSON.parse(event.data);
-            const f = this.functions.get(data.type);
-            if(f) f(data.data);
+            const {type ,data} = JSON.parse(event.data);
+            console.log("message received", type, JSON.parse(data));
+            this.functions.get(type)?.(JSON.parse(data));
         }
+        this.map = null;
     }
     /**
      * @param {WebSocket} ws 
-     * @returns {void}
+     * @returns {Socket}
      */
-    getInstance(ws) {
-        if(!socket.instance) new Socket(ws);
-        return socket.instance;
+    static getInstance(ws) {
+        return this.instance || new Socket(ws);
     }
 
     send(type, data) {
+        console.log("message sent", type, data);
         this.ws.send(JSON.stringify({type: type, data: JSON.stringify(data)}))
     }
 
@@ -35,10 +36,7 @@ class Socket {
      * @returns { void }
      */
     on(type, callback) {
-        this.functions.set(type, callback);
+        console.log("new listener", type);
+        this.functions.set(type, callback.bind(Game.getInstance()));
     }
-
-   
-
-
 }

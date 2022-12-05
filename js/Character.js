@@ -71,24 +71,25 @@ class MainCharacter extends Character {
         if (this.x < window.innerWidth / 2) {
             xTranslation = window.innerWidth / 2
             ownXTranslation = this.x - window.innerWidth / 2
-        } else if (this.x + charSize > mapWidth - window.innerWidth / 2) {
-            xTranslation = mapWidth - window.innerWidth / 2 - charSize
-            ownXTranslation = this.x - (mapWidth - window.innerWidth / 2) + charSize
+        } else if (this.x + Game.charSize > Game.mapWidth - window.innerWidth / 2) {
+            xTranslation = Game.mapWidth - window.innerWidth / 2 - Game.charSize
+            ownXTranslation = this.x - (Game.mapWidth - window.innerWidth / 2) + Game.charSize
         }
        
         if (this.y < window.innerHeight / 2) {
             yTranslation = window.innerHeight / 2
             ownYTranslation = this.y - window.innerHeight / 2
-        } else if (this.y + charSize > mapHeight - window.innerHeight / 2) {
-            yTranslation = mapHeight - window.innerHeight / 2 - charSize
-            ownYTranslation = this.y - (mapHeight - window.innerHeight / 2) + charSize
+        } else if (this.y + Game.charSize > Game.mapHeight - window.innerHeight / 2) {
+            yTranslation = Game.mapHeight - window.innerHeight / 2 - Game.charSize
+            ownYTranslation = this.y - (Game.mapHeight - window.innerHeight / 2) + Game.charSize
         }
 
         this.element.style.transform = `translate(${ownXTranslation}px, ${ownYTranslation}px)`
+        console.log(`translate(${ownXTranslation}px, ${ownYTranslation}px)`)
 
         document.querySelector('main').style.transform = `translate(${-xTranslation}px, ${-yTranslation}px)`
         if (this.directionX !== 0 || this.directionY !== 0)
-            sendToServer('move', {
+            Game.getInstance()?.socket.send('move', {
                 id: this.id,
                 x: this.x,
                 y: this.y,

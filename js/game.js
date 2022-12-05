@@ -5,12 +5,13 @@ class Game {
     // singleton
     static instance =  null
 
-    static mapSize = 500; // en pixel
+    static mapWidth = 4300
+    static mapHeight = 2900
     static gridSize = 5;
     static charSize = 50;
 
     constructor() {
-        this.socket = new Socket(new WebSocket('ws://localhost:8080/ws'))
+        this.socket = Socket.getInstance(new WebSocket('ws://localhost:8080/ws'))
         this.boost = 0
         this.pressedKeys = {
             'KeyW': false,
@@ -23,6 +24,7 @@ class Game {
         this.directionY = 0
         this.characterName = ""
         this.listOtherPlayers = []
+        this.map = null
     }
     
     
@@ -34,23 +36,22 @@ class Game {
 
     setUpSocketListeners() {
         this.socket.on("map", function (gameMap) {
-            console.log("map is " + this.map.fragments);
-            this.map = new Map(gameMap)
-        })
-        this.socket.on('open', function (event) {
-            socket.send(JSON.stringify({
-                type: 'test',
-                data: 'hello world'
-            }))
+            this.map = new GameMap(gameMap.fragments,gameMap.buildings)
+            console.log("done");
         })
 
-        this.socket.on("id", id => {
+        this.socket.on("id", function (id) {
+            console.log("id received");
             this.mainCharacter = new MainCharacter(this.characterName, id)
-            document.getElementById('landingForm').remove()
+            const form = document.getElementById('landingForm')
+            console.log(form);
+            form.remove()
             document.querySelector('main').style.filter = 'blur(0px)'
-            socket.send('enter-game', {
+            this.socket.send('enter-game', {
                 id: parseInt(id),
-                name: characterName
+                name: this.characterName,
+                x: this.mainCharacter.x,
+                y: this.mainCharacter.y,
             })
             this.start()
         })
@@ -59,10 +60,12 @@ class Game {
 
     setUpWindowListeners() {
         document.addEventListener('keydown', e => {
+            console.log("keydown", e.code);
             this.pressedKeys[e.code] = true;
         })
         
         document.addEventListener('keyup', e => {
+            console.log("down", e.code);
             this.pressedKeys[e.code] = false
         })
 
@@ -77,6 +80,7 @@ class Game {
     
     
     async adaptDirection() {
+        console.log("adapt direction", this.pressedKeys);
         this.newDirectionX = 0
         this.newDirectionY = 0
         if (this.pressedKeys['KeyW']) {
@@ -91,30 +95,31 @@ class Game {
         if (this.pressedKeys['KeyD']) {
             this.newDirectionX = 1
         }
-        await pause(50)
-        adaptDirection()
+        await pause(500)
+        this.adaptDirection()
     }
 
     async gameLoop() {
-
-        let nextX = this.mainCharacter.x + directionX * (gridSize + boost)
-        let nextY = this.mainCharacter.y + directionY * (gridSize + boost)
-    
-        if (checkNextPos(nextX, nextY)) {
-           this.mainCharacter.update(nextX, nextY, directionX, directionY)
+        const mainCharacter = this.mainCharacter
+        console.log("game-loop");
+        console.log(this);
+        console.log(this.map);
+        let nextX = mainCharacter.x + this.directionX * (Game.gridSize +this.boost)
+        let nextY = mainCharacter.y + this.directionY * (Game.gridSize +this.boost)
+        if (this.map.checkNextPos(nextX, nextY)) {
+           mainCharacter.update(nextX, nextY, this.directionX, this.directionY)
         } else if (checkNextPos(nextX, mainCharacter.y)) {
-            this.mainCharacter.update(nextX, mainCharacter.y, directionX, 0)
+            mainCharacter.update(nextX, mainCharacter.y, this.directionX, 0)
         } else if (checkNextPos(mainCharacter.x, nextY)) {
-            this.mainCharacter.update(mainCharacter.x, nextY, 0, directionY)
+            mainCharacter.update(mainCharacter.x, nextY, 0, this.directionY)
+        }
+        if (this.directionX == -1) {
+            mainCharacter.element.querySelector('img').style.transform = 'rotateY(180deg)'
+        } else if (this.directionX == 1) {
+            mainCharacter.element.querySelector('img').style.transform = 'rotateY(0deg)'
         }
     
-        if (directionX == -1) {
-            this.mainCharacter.element.querySelector('img').style.transform = 'rotateY(180deg)'
-        } else if (directionX == 1) {
-            this.mainCharacter.element.querySelector('img').style.transform = 'rotateY(0deg)'
-        }
-    
-        for (otherPlayer of listOtherPlayers) {
+        for (const otherPlayer of this.listOtherPlayers) {
             let distanceX = mainCharacter.x - otherPlayer.x
             let distanceY = mainCharacter.y - otherPlayer.y
             let distance = Math.sqrt(distanceX * distanceX + distanceY * distanceY)
@@ -125,15 +130,19 @@ class Game {
                 otherPlayer.element.style.opacity = 0
             }
         }
-    
-        boost = pressedKeys['ShiftLeft'] ? 3 : 0
+        this.this.boost = pressedKeys['ShiftLeft'] ? 3 : 0
         await pause(10)
-        gameLoop()
+        this.gameLoop()
+    }
+
+    init() {
+        this.setUpWindowListeners()
+        this.setUpSocketListeners()
     }
 
     async start() {
-        gameLoop()
-        adaptDirection()
+        this.gameLoop()
+        this.adaptDirection()
     }
 }
 
