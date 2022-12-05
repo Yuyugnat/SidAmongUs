@@ -64,7 +64,29 @@ class MainCharacter extends Character {
         super.update(x, y)
         this.directionX = directionX
         this.directionY = directionY
-        document.querySelector('main').style.transform = `translate(${-x}px, ${-y}px)`
+        let xTranslation = x
+        let yTranslation = y
+        let ownXTranslation = 0
+        let ownYTranslation = 0
+        if (this.x < window.innerWidth / 2) {
+            xTranslation = window.innerWidth / 2
+            ownXTranslation = this.x - window.innerWidth / 2
+        } else if (this.x + charSize > mapWidth - window.innerWidth / 2) {
+            xTranslation = mapWidth - window.innerWidth / 2 - charSize
+            ownXTranslation = this.x - (mapWidth - window.innerWidth / 2) + charSize
+        }
+       
+        if (this.y < window.innerHeight / 2) {
+            yTranslation = window.innerHeight / 2
+            ownYTranslation = this.y - window.innerHeight / 2
+        } else if (this.y + charSize > mapHeight - window.innerHeight / 2) {
+            yTranslation = mapHeight - window.innerHeight / 2 - charSize
+            ownYTranslation = this.y - (mapHeight - window.innerHeight / 2) + charSize
+        }
+
+        this.element.style.transform = `translate(${ownXTranslation}px, ${ownYTranslation}px)`
+
+        document.querySelector('main').style.transform = `translate(${-xTranslation}px, ${-yTranslation}px)`
         if (this.directionX !== 0 || this.directionY !== 0)
             sendToServer('move', {
                 id: this.id,
@@ -78,6 +100,7 @@ class OtherCharacter extends Character {
     constructor(name, id) {
         super(name, id)
         this.create()
+        this.close = false
     }
 
     create() {
@@ -89,6 +112,15 @@ class OtherCharacter extends Character {
     render() {
         super.render()
         document.querySelector('main').appendChild(this.element)
+        this.element.addEventListener('click', () => {
+            console.log('click');
+        })
+        this.element.addEventListener('mouseover', () => {
+            console.log('over');
+            if (this.close) {
+                this.element.classList.add('clickable')
+            }
+        })
     }
 
     update(x, y) {

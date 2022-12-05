@@ -13,6 +13,12 @@ type Event struct {
 	Data string `json:"data"`
 }
 
+type Move struct {
+	ID int `json:"id"`
+	X  int `json:"x"`
+	Y  int `json:"y"`
+}
+
 func BroadcastEvent(event *Event, conn *websocket.Conn) {
 	for c := range h.connections {
 		if c.ws != conn {
@@ -45,10 +51,21 @@ func HandleAskForID(conn *websocket.Conn) {
 
 func HandleMove(data string, conn *websocket.Conn) {
 	// log.Println("Handling move :", data)
+	move := &Move{}
+	json.Unmarshal([]byte(data), move)
 	BroadcastEvent(&Event{
 		Type: "move",
 		Data: data,
 	}, conn)
+	// update the player position
+	for i, player := range PlayersList {
+		if player.Conn == conn {
+			PlayersList[i].X = move.X
+			PlayersList[i].Y = move.Y
+		}
+		log.Println(data)
+		log.Println("Player", i, ":", PlayersList[i])
+	}
 }
 
 func HandleEnterGame(data string, conn *websocket.Conn) {
@@ -81,14 +98,12 @@ func HandlePlayerDisconnected(data string, conn *websocket.Conn) {
 		Data: data,
 	}, conn)
 	// remove the player from the player list
-	id := -1
 	for i, player := range PlayersList {
 		if player.Conn == conn {
-			id = i
+			PlayersList = append(PlayersList[:i], PlayersList[i+1:]...)
 		}
 	}
-	PlayersList = append(PlayersList[:id], PlayersList[id+1:]...)
-	NbPlayers -= 1
+	fmt.Println("playerlist:", PlayersList)
 }
 
 func HandleEvent(event *Event, conn *websocket.Conn) {
@@ -102,6 +117,6 @@ func HandleEvent(event *Event, conn *websocket.Conn) {
 	case "enter-game":
 		HandleEnterGame(event.Data, conn)
 	case "player-disconnected":
-		HandlePlayerDisconnected(event.Data, conn)
+		HandlePlayerDisconnected(event.Data, conn)  
 	}
 }

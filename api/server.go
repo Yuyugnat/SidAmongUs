@@ -71,6 +71,8 @@ func main() {
 				Type: "player-disconnected",
 				Data: fmt.Sprint(id),
 			}, conn)
+			PlayersList = append(PlayersList[:id], PlayersList[id+1:]...)
+			NbPlayers -= 1
 			isClose = true
 			return nil
 		})
