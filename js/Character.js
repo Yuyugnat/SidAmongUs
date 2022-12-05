@@ -61,6 +61,7 @@ class MainCharacter extends Character {
     }
 
     update(x, y, directionX, directionY) {
+        console.log("moving");
         super.update(x, y)
         this.directionX = directionX
         this.directionY = directionY

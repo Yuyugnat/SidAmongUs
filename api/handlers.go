@@ -31,6 +31,11 @@ func HandleTest(data string) {
 	log.Println("Handling test :", data)
 }
 
+type AskIdData struct {
+	Id  int    `json:"id"`
+	Map string `json:"map"`
+}
+
 func HandleAskForID(conn *websocket.Conn) {
 	log.Println("Handling ask for id")
 	id := NbPlayers
@@ -43,9 +48,14 @@ func HandleAskForID(conn *websocket.Conn) {
 
 	jsonMap, _ := json.Marshal(Gamemap)
 
+	dataMap, _ := json.Marshal(AskIdData{
+		Id:  id,
+		Map: string(jsonMap),
+	})
+
 	conn.WriteJSON(Event{
-		Type: "map",
-		Data: string(jsonMap),
+		Type: "player-info",
+		Data: string(dataMap),
 	})
 }
 
@@ -117,6 +127,6 @@ func HandleEvent(event *Event, conn *websocket.Conn) {
 	case "enter-game":
 		HandleEnterGame(event.Data, conn)
 	case "player-disconnected":
-		HandlePlayerDisconnected(event.Data, conn)  
+		HandlePlayerDisconnected(event.Data, conn)
 	}
 }

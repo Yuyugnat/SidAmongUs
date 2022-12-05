@@ -36,8 +36,8 @@ class GameMap {
         
     }
 
-    static getInstance() {
-        if (GameMap.instance == null) GameMap.instance = new GameMap()
+    static getInstance(fragments = [], buildings = []) {
+        if (GameMap.instance == null) GameMap.instance = new GameMap(fragments, buildings)
         return GameMap.instance
     }
 
@@ -51,6 +51,7 @@ class GameMap {
 
 
     checkNextPos(x, y) {
+        console.log("postion requested", x, y);
         let goodXY = false
         let goodXsizeYsize = false
         let goodXsizeY = false
@@ -59,16 +60,17 @@ class GameMap {
             if (x >= mapFragment.x && y >= mapFragment.y && x <= mapFragment.x + mapFragment.width && y <= mapFragment.y + mapFragment.height) {
                 goodXY = true
             }
-            if (x + charSize <= mapFragment.x + mapFragment.width && y + charSize <= mapFragment.y + mapFragment.height && x + charSize >= mapFragment.x && y + charSize >= mapFragment.y) {
+            if (x + Game.charSizr <= mapFragment.x + mapFragment.width && y + Game.charSizr <= mapFragment.y + mapFragment.height && x + Game.charSizr >= mapFragment.x && y + Game.charSizr >= mapFragment.y) {
                 goodXsizeYsize = true
             }
-            if (x + charSize <= mapFragment.x + mapFragment.width && y <= mapFragment.y + mapFragment.height && x + charSize >= mapFragment.x && y >= mapFragment.y) {
+            if (x + Game.charSizr <= mapFragment.x + mapFragment.width && y <= mapFragment.y + mapFragment.height && x + Game.charSizr >= mapFragment.x && y >= mapFragment.y) {
                 goodXsizeY = true
             }
-            if (x <= mapFragment.x + mapFragment.width && y + charSize <= mapFragment.y + mapFragment.height && x >= mapFragment.x && y + charSize >= mapFragment.y) {
+            if (x <= mapFragment.x + mapFragment.width && y + Game.charSizr <= mapFragment.y + mapFragment.height && x >= mapFragment.x && y + Game.charSizr >= mapFragment.y) {
                 goodXYsize = true
             }
         }
+        console.log('goodXY', goodXY, 'goodXsizeYsize', goodXsizeYsize, 'goodXsizeY', goodXsizeY, 'goodXYsize', goodXYsize);
         return goodXY && goodXYsize && goodXsizeY && goodXsizeYsize
     }
 }
