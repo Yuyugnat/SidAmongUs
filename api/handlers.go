@@ -13,6 +13,12 @@ type Event struct {
 	Data string `json:"data"`
 }
 
+type Move struct {
+	ID int `json:"id"`
+	X  int `json:"x"`
+	Y  int `json:"y"`
+}
+
 func BroadcastEvent(event *Event, conn *websocket.Conn) {
 	for c := range h.connections {
 		if c.ws != conn {
@@ -45,10 +51,21 @@ func HandleAskForID(conn *websocket.Conn) {
 
 func HandleMove(data string, conn *websocket.Conn) {
 	// log.Println("Handling move :", data)
+	move := &Move{}
+	json.Unmarshal([]byte(data), move)
 	BroadcastEvent(&Event{
 		Type: "move",
 		Data: data,
 	}, conn)
+	// update the player position
+	for i, player := range PlayersList {
+		if player.Conn == conn {
+			PlayersList[i].X = move.X
+			PlayersList[i].Y = move.Y
+		}
+		log.Println(data)
+		log.Println("Player", i, ":", PlayersList[i])
+	}
 }
 
 func HandleEnterGame(data string, conn *websocket.Conn) {
