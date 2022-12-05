@@ -110,10 +110,33 @@ func HandlePlayerDisconnected(data string, conn *websocket.Conn) {
 
 func HandlePlayerChat(data string, conn *websocket.Conn) {
 	log.Println("Handling player chat :", data)
+
+	messageData := &IncommingMessage{}
+	json.Unmarshal([]byte(data), messageData)
+	player := PlayersList[messageData.ID]
+
+	broadcastMessageData := &BroadcastMessage{
+		ID:      messageData.ID,
+		X:       player.X,
+		Y:       player.Y,
+		Message: messageData.Message,
+	}
+
+	msgString, _ := json.Marshal(broadcastMessageData)
+
+	log.Println(string(msgString))
+
+	conn.WriteJSON(Event{
+		Type: "player-chat",
+		Data: string(msgString),
+	})
+
 	BroadcastEvent(&Event{
 		Type: "player-chat",
-		Data: data,
+		Data: string(msgString),
 	}, conn)
+
+	log.Println("Broadcasting player chat :", string(msgString))
 }
 
 func HandleEvent(event *Event, conn *websocket.Conn) {
@@ -128,7 +151,7 @@ func HandleEvent(event *Event, conn *websocket.Conn) {
 		HandleEnterGame(event.Data, conn)
 	case "player-disconnected":
 		HandlePlayerDisconnected(event.Data, conn)
-	case "chat--message":
+	case "chat-message":
 		HandlePlayerChat(event.Data, conn)
 	}
 }

@@ -1,16 +1,22 @@
 class Chat {
     static input = document.getElementById('chat');
+    static message = document.getElementById('message');
     static isChatOpened = false;
 
     static handlePressEnter() {
         if (Chat.isChatOpened) {
-            this.input.style.display = 'none';
-            sendToServer('chat--message', {
+            Chat.isChatOpened = false;
+            Chat.input.style.display = 'none';
+            const message = Chat.message.value;
+            Chat.message.value = '';
+            sendToServer('chat-message', {
                 id: parseInt(mainCharacter.id),
-                name: mainCharacter.name,
+                message
             })
         } else {
-            this.input.style.display = 'flex';
+            Chat.isChatOpened = true;
+            Chat.input.style.display = 'flex';
+            Chat.message.focus();
         }
     }
 

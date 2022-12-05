@@ -29,6 +29,7 @@
     <script src="js/Character.js"></script>
     <script src="js/game.js"></script>
     <script src="js/socketGestion.js"></script>
+    <script src="js/chat.js"></script>
     <script>
         function receiveEvent(event) {
             // console.log(event.data);
@@ -56,10 +57,14 @@
                 case 'map':
                     eventHandler.onMap(JSON.parse(event.data));
                     break
+                case 'player-chat':
+                    eventHandler.onChatMessage(JSON.parse(event.data));
+                    break
             }
         }
 
         socket.onmessage = (e) => {
+            console.log(e);
             receiveEvent(e);
         }
     </script>

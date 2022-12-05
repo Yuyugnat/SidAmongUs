@@ -3,7 +3,7 @@ let map = {
     buildings: []
 }
 
-const socket = new WebSocket('ws://172.16.20.35:8080/ws')
+const socket = new WebSocket('ws://192.168.1.16:8080/ws')
 
 let eventHandler = {}
 
@@ -42,7 +42,6 @@ socket.addEventListener('open', function (event) {
         type: 'test',
         data: 'hello world'
     }))
-    // socket.dispatchEvent(new CustomEvent('start'))
 })
 
 console.log(socket);
@@ -95,7 +94,12 @@ function checkNextPos(x, y) {
 }
 
 document.addEventListener('keydown', e => {
-    pressedKeys[e.code] = true;
+    if (e.code === 'Enter') {
+        Chat.handlePressEnter();
+    } else if (!Chat.isChatOpened){
+        pressedKeys[e.code] = true;
+    }
+    
 })
 
 document.addEventListener('keyup', e => {
