@@ -15,7 +15,6 @@ type connection struct {
 	// The hub.
 	h *hub
 }
-
 type hub struct {
 	// Registered connections. That's a connection pool
 	connections map[*connection]bool

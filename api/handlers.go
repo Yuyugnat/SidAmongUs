@@ -12,7 +12,6 @@ type Event struct {
 	Type string `json:"type"`
 	Data string `json:"data"`
 }
-
 type Move struct {
 	ID int `json:"id"`
 	X  int `json:"x"`
