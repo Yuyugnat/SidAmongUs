@@ -60,13 +60,13 @@ class GameMap {
             if (x >= mapFragment.x && y >= mapFragment.y && x <= mapFragment.x + mapFragment.width && y <= mapFragment.y + mapFragment.height) {
                 goodXY = true
             }
-            if (x + Game.charSizr <= mapFragment.x + mapFragment.width && y + Game.charSizr <= mapFragment.y + mapFragment.height && x + Game.charSizr >= mapFragment.x && y + Game.charSizr >= mapFragment.y) {
+            if (x + Game.charSize <= mapFragment.x + mapFragment.width && y + Game.charSize <= mapFragment.y + mapFragment.height && x + Game.charSize >= mapFragment.x && y + Game.charSize >= mapFragment.y) {
                 goodXsizeYsize = true
             }
-            if (x + Game.charSizr <= mapFragment.x + mapFragment.width && y <= mapFragment.y + mapFragment.height && x + Game.charSizr >= mapFragment.x && y >= mapFragment.y) {
+            if (x + Game.charSize <= mapFragment.x + mapFragment.width && y <= mapFragment.y + mapFragment.height && x + Game.charSize >= mapFragment.x && y >= mapFragment.y) {
                 goodXsizeY = true
             }
-            if (x <= mapFragment.x + mapFragment.width && y + Game.charSizr <= mapFragment.y + mapFragment.height && x >= mapFragment.x && y + Game.charSizr >= mapFragment.y) {
+            if (x <= mapFragment.x + mapFragment.width && y + Game.charSize <= mapFragment.y + mapFragment.height && x >= mapFragment.x && y + Game.charSize >= mapFragment.y) {
                 goodXYsize = true
             }
         }

@@ -7,7 +7,7 @@ class Game {
 
     static mapWidth = 4300
     static mapHeight = 2900
-    static gridSize = 5;
+    static gridSize = 20;
     static charSize = 50;
 
     constructor() {
@@ -106,35 +106,37 @@ class Game {
         let newDirectionX = 0
         let newDirectionY = 0
         if (this.pressedKeys['KeyW']) {
-            newDirectionY = -1
+            newDirectionY -= 1
         }
         if (this.pressedKeys['KeyS']) {
-            newDirectionY = 1
+            newDirectionY += 1
         }
         if (this.pressedKeys['KeyA']) {
-            newDirectionX = -1
+            newDirectionX -= 1
         }
         if (this.pressedKeys['KeyD']) {
-            newDirectionX = 1
+            newDirectionX += 1
         }
         this.directionX = newDirectionX
         this.directionY = newDirectionY
         console.log("dir",this.newDirectionX, this.newDirectionY);
-        await pause(100)
+        await pause(50)
         this.adaptDirection()
     }
 
     async gameLoop() {
         const mainCharacter = this.mainCharacter
+
+        console.log("jump :" + this.directionX * (Game.gridSize + this.boost));
         let nextX = mainCharacter.x + this.directionX * (Game.gridSize + this.boost)
         let nextY = mainCharacter.y + this.directionY * (Game.gridSize + this.boost)
     
         if (this.map.checkNextPos(nextX, nextY)) {
             mainCharacter.update(nextX, nextY, this.directionX, this.directionY)
         } else if (this.map.checkNextPos(nextX, mainCharacter.y)) {
-            mainCharacter.update(nextX, mainCharacter.y, this.directionX, 0)
+            mainCharacter.update(nextX, mainCharacter.y, this.directionX, this.directionY)
         } else if (this.map.checkNextPos(mainCharacter.x, nextY)) {
-            mainCharacter.update(mainCharacter.x, nextY, 0, this.directionY)
+            mainCharacter.update(mainCharacter.x, nextY, this.directionX, this.directionY)
         }
     
         if (this.directionX == -1) {
@@ -163,8 +165,8 @@ class Game {
                 otherPlayer.close = false
             }
         }
-        this.boost = this.pressedKeys['ShiftLeft'] ? 3 : 0
-        await pause(100)
+        this.boost = this.pressedKeys['ShiftLeft'] ? 5 : 0
+        await pause(50)
         this.gameLoop()
     }
 
