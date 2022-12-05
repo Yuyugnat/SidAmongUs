@@ -2,11 +2,13 @@ class Character {
     constructor(name, id) {
         this.name = name
         this.id = id
-        this.x = 200
-        this.y = 1000
+        this.x = 2100
+        this.y = 1500
         this.width = 50
+        this.directionX = 0
+        this.directionY = 0
         this.height = 50
-        this.imgLink = `img/sidamongus-${this.id % 5}.png`
+        this.imgLink = `img/sidamongus-${this.id % 8}.png`
     }
 
     create() {
@@ -45,6 +47,10 @@ class MainCharacter extends Character {
         let shadow = document.createElement('div')
         shadow.classList.add('shadow')
         this.element.appendChild(shadow)
+        let name = document.createElement('div')
+        name.classList.add('name')
+        name.innerText = this.name
+        this.element.appendChild(name)
         this.render()
     }
 
@@ -53,10 +59,17 @@ class MainCharacter extends Character {
         document.body.appendChild(this.element)
     }
 
-    update(x, y) {
+    update(x, y, directionX, directionY) {
         super.update(x, y)
+        this.directionX = directionX
+        this.directionY = directionY
         document.querySelector('main').style.transform = `translate(${-x}px, ${-y}px)`
-        socket.emit('move', {id: this.id, x: this.x, y: this.y})
+        if (this.directionX !== 0 || this.directionY !== 0)
+            sendToServer('move', {
+                id: this.id,
+                x: this.x,
+                y: this.y,
+            })
     }
 }
 

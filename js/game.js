@@ -1,193 +1,53 @@
-const map = [
-    {
-        id: 1,
-        x: 200,
-        y: 1000,
-        width: 200,
-        height: 900
-    },
-    {
-        id: 2,
-        x: 400,
-        y: 1600,
-        width: 2500,
-        height: 300
-    },
-    {
-        id: 3,
-        x: 800,
-        y: 900,
-        width: 400,
-        height: 700
-    },
-    {
-        id: 4,
-        x: 800,
-        y: 200,
-        width: 200,
-        height: 700
-    },
-    {
-        id: 5,
-        x: 1000,
-        y: 200,
-        width: 3000,
-        height: 200
-    },
-    {
-        id: 6,
-        x: 1000,
-        y: 800,
-        width: 100,
-        height: 100
-    },
-    {
-        id: 7,
-        x: 3800,
-        y: 400,
-        width: 200,
-        height: 1900
-    },
-    {
-        id: 8,
-        x: 2000,
-        y: 400,
-        width: 100,
-        height: 200
-    },
-    {
-        id: 9,
-        x: 2100,
-        y: 500,
-        width: 900,
-        height: 100
-    },
-    {
-        id: 10,
-        x: 2900,
-        y: 600,
-        width: 100,
-        height: 300
-    },
-    {
-        id: 11,
-        x: 1200,
-        y: 900,
-        width: 1700,
-        height: 200
-    },
-    {
-        id: 12,
-        x: 2900,
-        y: 900,
-        width: 600,
-        height: 300
-    },
-    {
-        id: 13,
-        x: 3200,
-        y: 800,
-        width: 300,
-        height: 100
-    },
-    {
-        id: 14,
-        x: 2900,
-        y: 1200,
-        width: 300,
-        height: 1000
-    },
-    {
-        id: 15,
-        x: 3200,
-        y: 1500,
-        width: 300,
-        height: 200
-    },
-    {
-        id: 16,
-        x: 2700,
-        y: 1400,
-        width: 200,
-        height: 200
-    },
-    {
-        id: 17,
-        x: 2700,
-        y: 1300,
-        width: 100,
-        height: 100
-    },
-    {
-        id: 18,
-        x: 3200,
-        y: 2100,
-        width: 300,
-        height: 100
-    },
-    {
-        id: 19,
-        x: 2200,
-        y: 2300,
-        width: 1800,
-        height: 200
-    },
-    {
-        id: 20,
-        x: 2200,
-        y: 1900,
-        width: 300,
-        height: 300
-    },
-    {
-        id: 21,
-        x: 1500,
-        y: 1900,
-        width: 300,
-        height: 500
-    },
-    {
-        id: 22,
-        x: 800,
-        y: 2200,
-        width: 700,
-        height: 200
-    },
-    {
-        id: 23,
-        x: 800,
-        y: 1900,
-        width: 300,
-        height: 300
-    },
-    {
-        id: 24,
-        x: 1400,
-        y: 1500,
-        width: 100,
-        height: 100
-    },
-    {
-        id: 25,
-        x: 2100,
-        y: 1400,
-        width: 100,
-        height: 200
-    }
-]
-
-for (mapFragment of map) {
-    const htmlMapFragment = document.createElement('div')
-    htmlMapFragment.style.top = mapFragment.y + 'px'
-    htmlMapFragment.style.left = mapFragment.x + 'px'
-    htmlMapFragment.style.width = mapFragment.width + 'px'
-    htmlMapFragment.style.height = mapFragment.height + 'px'
-    htmlMapFragment.classList.add('map-fragment')
-    htmlMapFragment.id = 'mf-' + mapFragment.id
-    document.querySelector('main').appendChild(htmlMapFragment)
+let map = {
+    fragments: [],
+    buildings: []
 }
 
-const socket = io('ws://5.tcp.eu.ngrok.io:19785')
+const socket = new WebSocket('ws://172.16.20.35:8080/ws')
+
+let eventHandler = {}
+
+eventHandler.onMap = gameMap => {
+    map = gameMap
+    for (mapFragment of map.fragments) {
+        const htmlMapFragment = document.createElement('div')
+        htmlMapFragment.style.top = mapFragment.y + 'px'
+        htmlMapFragment.style.left = mapFragment.x + 'px'
+        htmlMapFragment.style.width = mapFragment.width + 'px'
+        htmlMapFragment.style.height = mapFragment.height + 'px'
+        htmlMapFragment.classList.add('map-fragment')
+        htmlMapFragment.id = 'mf-' + mapFragment.id
+        document.querySelector('main').appendChild(htmlMapFragment)
+    }
+
+    for (building of map.buildings) {
+        const htmlBuilding = document.createElement('img')
+        htmlBuilding.src = building.link
+        htmlBuilding.style.top = building.y + 'px'
+        htmlBuilding.style.left = building.x + 'px'
+        htmlBuilding.style.width = building.width + 'px'
+        htmlBuilding.style.height = building.height + 'px'
+        htmlBuilding.classList.add('building')
+        htmlBuilding.id = 'b-' + building.id
+        document.querySelector('main').appendChild(htmlBuilding)
+    }
+}
+
+function sendToServer(type, data) {
+    socket.send(JSON.stringify({type: type, data: JSON.stringify(data)}))
+}
+
+socket.addEventListener('open', function (event) {
+    socket.send(JSON.stringify({
+        type: 'test',
+        data: 'hello world'
+    }))
+    // socket.dispatchEvent(new CustomEvent('start'))
+})
+
+console.log(socket);
+
+let boost = 0
 
 var pressedKeys = {
     'KeyW': false,
@@ -216,7 +76,8 @@ function checkNextPos(x, y) {
     let goodXsizeYsize = false
     let goodXsizeY = false
     let goodXYsize = false
-    for(mapFragment of map) {
+    // console.log("map is " + map.fragments);
+    for(mapFragment of map.fragments) {
         if (x >= mapFragment.x && y >= mapFragment.y && x <= mapFragment.x + mapFragment.width && y <= mapFragment.y + mapFragment.height) {
             goodXY = true
         }
@@ -234,79 +95,94 @@ function checkNextPos(x, y) {
 }
 
 document.addEventListener('keydown', e => {
-    console.log(e.code);
     pressedKeys[e.code] = true;
-
-        switch (e.code) {
-            case 'KeyW':
-                directionY = -1
-                break;
-            case 'KeyA':
-                directionX = -1
-                break;
-            case 'KeyS':
-                directionY = 1
-                break;
-            case 'KeyD':
-                directionX = 1
-                break;
-        }
-    
 })
-
-async function nullifyDirection() {
-    if (pressedKeys['KeyA'] == false &&  pressedKeys['KeyD'] == false) {
-        directionX = 0
-    }
-    if (pressedKeys['KeyS'] == false && pressedKeys['KeyW'] == false) {
-        directionY = 0
-    }
-    await pause(50)
-    nullifyDirection()
-}
 
 document.addEventListener('keyup', e => {
     pressedKeys[e.code] = false
 })
 
+async function adaptDirection() {
+    let newDirectionX = 0
+    let newDirectionY = 0
+    if (pressedKeys['KeyW']) {
+        newDirectionY = -1
+    }
+    if (pressedKeys['KeyS']) {
+        newDirectionY = 1
+    }
+    if (pressedKeys['KeyA']) {
+        newDirectionX = -1
+    }
+    if (pressedKeys['KeyD']) {
+        newDirectionX = 1
+    }
+    directionX = newDirectionX
+    directionY = newDirectionY
+    await pause(50)
+    adaptDirection()
+}
+
 async function gameLoop() {
 
-    let nextX = mainCharacter.x + directionX * gridSize
-    let nextY = mainCharacter.y + directionY * gridSize
+    let nextX = mainCharacter.x + directionX * (gridSize + boost)
+    let nextY = mainCharacter.y + directionY * (gridSize + boost)
 
     if (checkNextPos(nextX, nextY)) {
-        mainCharacter.update(nextX, nextY)
+        mainCharacter.update(nextX, nextY, directionX, directionY)
+    } else if (checkNextPos(nextX, mainCharacter.y)) {
+        mainCharacter.update(nextX, mainCharacter.y, directionX, 0)
+    } else if (checkNextPos(mainCharacter.x, nextY)) {
+        mainCharacter.update(mainCharacter.x, nextY, 0, directionY)
     }
 
     if (directionX == -1) {
-        mainCharacter.element.style.transform = 'rotateY(180deg)'
+        mainCharacter.element.querySelector('img').style.transform = 'rotateY(180deg)'
     } else if (directionX == 1) {
-        mainCharacter.element.style.transform = 'rotateY(0deg)'
+        mainCharacter.element.querySelector('img').style.transform = 'rotateY(0deg)'
     }
 
-    let timePause = pressedKeys['ShiftLeft'] ? 8 : 15
-    document.querySelector('main').style.transition = `transform ${timePause}ms linear`
-    await pause(timePause)
+    for (otherPlayer of listOtherPlayers) {
+        let distanceX = mainCharacter.x - otherPlayer.x
+        let distanceY = mainCharacter.y - otherPlayer.y
+        let distance = Math.sqrt(distanceX * distanceX + distanceY * distanceY)
+
+        if (distance < 250) {
+            otherPlayer.element.style.opacity = 1
+        } else {
+            otherPlayer.element.style.opacity = 0
+        }
+    }
+
+    boost = pressedKeys['ShiftLeft'] ? 3 : 0
+    await pause(10)
     gameLoop()
 }
 
 function start() {
     gameLoop()
-    nullifyDirection()
+    adaptDirection()
 }
 
 let characterName
 
 document.getElementById('start').addEventListener('click', () => {
     console.log(start);
-    socket.emit('ask-for-id')
-    characterName = document.getElementById('landingForm').querySelector('input').value ?? 'no_name'
+    sendToServer('ask-for-id', '')
+    let value = document.getElementById('landingForm').querySelector('input').value
+    characterName = value == "" ? 'no_name' : value
 })
 
-socket.on('id', id => {
+
+
+
+eventHandler.onId = id => {
     mainCharacter = new MainCharacter(characterName, id)
     document.getElementById('landingForm').remove()
     document.querySelector('main').style.filter = 'blur(0px)'
-    socket.emit('enter-game', {id: id, name: characterName})
+    sendToServer('enter-game', {
+        id: parseInt(id),
+        name: characterName
+    })
     start()
-})
+}

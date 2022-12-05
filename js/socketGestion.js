@@ -1,29 +1,32 @@
 let listOtherPlayers = []
 
-socket.on('players-list', (playersList) => {
-    console.log(playersList);
+eventHandler.onPlayersList = (playersList) => {
+    console.log("coucou", playersList);
     playersList.forEach(player => {
+        console.log(player);
         listOtherPlayers.push(new OtherCharacter(player.name, player.id))
     })
-})
+}
 
-socket.on('new-player', ({name, id}) => {
+eventHandler.onNewPlayer = ({name, id}) => {
     console.log("un nouveau joueur");
     listOtherPlayers.push(new OtherCharacter(name, id))
-})
+}
 
-socket.on('move', ({id, x, y}) => {
+eventHandler.onMove = ({id, x, y}) => {
     listOtherPlayers.forEach(player => {
         if (player.id == id) {
             player.update(x, y)
         }
-        })
-})
+    })
+}
 
-socket.on('player-disconnected', ({socket}) => {
+eventHandler.onPlayerDisconnected = (id) => {
+    console.log(listOtherPlayers);
     listOtherPlayers.forEach(player => {
-        if (player.id == socket) {
+        if (player.id == id) {
+            console.log(player);
             player.element.remove()
         }
     })
-})
+}

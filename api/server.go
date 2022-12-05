@@ -1,0 +1,98 @@
+package main
+
+import (
+	"fmt"
+	"log"
+	"net/http"
+
+	"github.com/gorilla/websocket"
+)
+
+type connection struct {
+	// The websocket connection.
+	ws *websocket.Conn
+
+	// The hub.
+	h *hub
+}
+
+type hub struct {
+	// Registered connections. That's a connection pool
+	connections map[*connection]bool
+}
+
+var NbPlayers = 0
+
+var h = hub{}
+
+// declare PlayerList as a slice
+var PlayersList []Player = make([]Player, 0)
+
+var Gamemap = CreateMap("api/map.json")
+
+// Message is a struct
+
+func main() {
+
+	// create a new hub
+	h = hub{
+		connections: make(map[*connection]bool),
+	}
+
+	fmt.Println(Gamemap)
+
+	upgrader := websocket.Upgrader{
+		ReadBufferSize:  1024,
+		WriteBufferSize: 1024,
+
+		// Allow all connections by default
+		CheckOrigin: func(r *http.Request) bool { return true },
+	}
+
+	http.HandleFunc("/ws", func(w http.ResponseWriter, r *http.Request) {
+		conn, err := upgrader.Upgrade(w, r, nil)
+		if err != nil {
+			log.Println(err)
+			return
+		}
+		h.connections[&connection{ws: conn, h: &h}] = true
+
+		isClose := false
+
+		conn.SetCloseHandler(func(code int, text string) error {
+			delete(h.connections, &connection{ws: conn, h: &h})
+			id := -1
+			for i, player := range PlayersList {
+				if player.Conn == conn {
+					id = i
+				}
+			}
+			BroadcastEvent(&Event{
+				Type: "player-disconnected",
+				Data: fmt.Sprint(id),
+			}, conn)
+			isClose = true
+			return nil
+		})
+
+		log.Println("Client connected")
+
+		for !isClose {
+			// Read message from browser
+			event := &Event{}
+			conn.ReadJSON(&event)
+			if event.Type != "move" {
+				log.Println("Event received :", event)
+			}
+			HandleEvent(event, conn)
+		}
+		fmt.Println("Client disconnected")
+		conn.Close()
+	})
+
+	http.Handle("/", http.FileServer(http.Dir("./")))
+
+	log.Println("Starting server on :8080")
+	log.Println("Open http://localhost:8080/ in your browser")
+	http.ListenAndServe(":8080", nil)
+}

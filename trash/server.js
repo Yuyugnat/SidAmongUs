@@ -2,16 +2,17 @@ import { createServer } from "http";
 import { Server } from "socket.io";
 
 const httpServer = createServer();
-httpServer.listen(3001)
+httpServer.listen(3002)
 
 let nbPlayers = 0
 let playersList = []
 
 const io = new Server(httpServer, {
-  cors: {
+    // path: "/socket.io",
+    cors: {
     origin: "*",
     methods: ["GET", "POST"]
-  }
+    }
 });
 
 io.on("connection", (socket) => {
@@ -33,6 +34,8 @@ io.on("connection", (socket) => {
     socket.on('move', ({id, x, y}) => {
         socket.broadcast.emit('move', {id: id, x: x, y: y})
     })
+
+    server.emiut()
 
     socket.on('disconnect', () => {
         console.log('user disconnected');
