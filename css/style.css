@@ -156,4 +156,7 @@ main {
     color: black;
     border: 2px solid rgb(165, 165, 165);
     background-color: white;
+    animation: ease-in-out;
+    animation-duration: 0.5s;
+    transition-duration: .5s;
 }
