@@ -34,7 +34,7 @@ eventHandler.onMap = gameMap => {
 }
 
 function sendToServer(type, data) {
-    socket.send(JSON.stringify({type: type, data: JSON.stringify(data)}))
+    socket.send(JSON.stringify({ type: type, data: JSON.stringify(data) }))
 }
 
 socket.addEventListener('open', function (event) {
@@ -60,9 +60,10 @@ const pause = (ms) => new Promise(resolve => setTimeout(resolve, ms))
 
 let mainCharacter
 
-const mapSize = 500; // en pixel
-const gridSize = 5;
-const charSize = 50;
+const mapWidth = 4300
+const mapHeight = 2900
+const charSize = 50
+const gridSize = 10
 
 let keyDown = false
 
@@ -77,7 +78,7 @@ function checkNextPos(x, y) {
     let goodXsizeY = false
     let goodXYsize = false
     // console.log("map is " + map.fragments);
-    for(mapFragment of map.fragments) {
+    for (mapFragment of map.fragments) {
         if (x >= mapFragment.x && y >= mapFragment.y && x <= mapFragment.x + mapFragment.width && y <= mapFragment.y + mapFragment.height) {
             goodXY = true
         }
@@ -100,6 +101,19 @@ document.addEventListener('keydown', e => {
 
 document.addEventListener('keyup', e => {
     pressedKeys[e.code] = false
+    // check if e is a space
+    if (e.code === 'Space') {
+        let nextX = mainCharacter.x + 300 * directionX
+        let nextY = mainCharacter.y + 300 * directionY
+
+        if (checkNextPos(nextX, nextY)) {
+            mainCharacter.update(nextX, nextY, directionX, directionY)
+        } else if (checkNextPos(nextX, mainCharacter.y)) {
+            mainCharacter.update(nextX, mainCharacter.y, directionX, 0)
+        } else if (checkNextPos(mainCharacter.x, nextY)) {
+            mainCharacter.update(mainCharacter.x, nextY, 0, directionY)
+        }
+    }
 })
 
 async function adaptDirection() {
@@ -137,9 +151,12 @@ async function gameLoop() {
     }
 
     if (directionX == -1) {
-        mainCharacter.element.querySelector('img').style.transform = 'rotateY(180deg)'
+        // mainCharacter.element.style.transition = 'transform 50ms linear'
+        mainCharacter.element.querySelector('img').style.transform = 'scaleX(-1)'
+        // transform 50ms linear
     } else if (directionX == 1) {
-        mainCharacter.element.querySelector('img').style.transform = 'rotateY(0deg)'
+        mainCharacter.element.querySelector('img').style.transform = 'scaleX(1)'
+        // mainCharacter.element.style.transition = 'transform 50ms linear'
     }
 
     for (otherPlayer of listOtherPlayers) {
@@ -152,10 +169,16 @@ async function gameLoop() {
         } else {
             otherPlayer.element.style.opacity = 0
         }
+
+        if (distance < 50) {
+            otherPlayer.close = true
+        } else {
+            otherPlayer.close = false
+        }
     }
 
-    boost = pressedKeys['ShiftLeft'] ? 3 : 0
-    await pause(10)
+    boost = pressedKeys['ShiftLeft'] ? 10 : 0
+    await pause(25)
     gameLoop()
 }
 

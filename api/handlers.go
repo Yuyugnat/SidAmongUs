@@ -81,14 +81,12 @@ func HandlePlayerDisconnected(data string, conn *websocket.Conn) {
 		Data: data,
 	}, conn)
 	// remove the player from the player list
-	id := -1
 	for i, player := range PlayersList {
 		if player.Conn == conn {
-			id = i
+			PlayersList = append(PlayersList[:i], PlayersList[i+1:]...)
 		}
 	}
-	PlayersList = append(PlayersList[:id], PlayersList[id+1:]...)
-	NbPlayers -= 1
+	fmt.Println("playerlist:", PlayersList)
 }
 
 func HandleEvent(event *Event, conn *websocket.Conn) {
