@@ -91,6 +91,14 @@ func HandlePlayerDisconnected(data string, conn *websocket.Conn) {
 	NbPlayers -= 1
 }
 
+func HandlePlayerChat(data string, conn *websocket.Conn) {
+	log.Println("Handling player chat :", data)
+	BroadcastEvent(&Event{
+		Type: "player-chat",
+		Data: data,
+	}, conn)
+}
+
 func HandleEvent(event *Event, conn *websocket.Conn) {
 	switch event.Type {
 	case "ask-for-id":
@@ -103,5 +111,7 @@ func HandleEvent(event *Event, conn *websocket.Conn) {
 		HandleEnterGame(event.Data, conn)
 	case "player-disconnected":
 		HandlePlayerDisconnected(event.Data, conn)
+	case "chat--message":
+		HandlePlayerChat(event.Data, conn)
 	}
 }
