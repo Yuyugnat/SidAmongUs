@@ -205,7 +205,9 @@ eventHandler.onId = id => {
     document.querySelector('main').style.filter = 'blur(0px)'
     sendToServer('enter-game', {
         id: parseInt(id),
-        name: characterName
+        name: characterName,
+        x: mainCharacter.x,
+        y: mainCharacter.y,
     })
     start()
 }
