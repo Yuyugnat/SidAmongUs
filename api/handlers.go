@@ -117,6 +117,6 @@ func HandleEvent(event *Event, conn *websocket.Conn) {
 	case "enter-game":
 		HandleEnterGame(event.Data, conn)
 	case "player-disconnected":
-		HandlePlayerDisconnected(event.Data, conn)
+		HandlePlayerDisconnected(event.Data, conn)  
 	}
 }
