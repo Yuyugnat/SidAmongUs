@@ -120,16 +120,16 @@ async function adaptDirection() {
     let newDirectionX = 0
     let newDirectionY = 0
     if (pressedKeys['KeyW']) {
-        newDirectionY = -1
+        newDirectionY -= 1
     }
     if (pressedKeys['KeyS']) {
-        newDirectionY = 1
+        newDirectionY += 1
     }
     if (pressedKeys['KeyA']) {
-        newDirectionX = -1
+        newDirectionX -= 1
     }
     if (pressedKeys['KeyD']) {
-        newDirectionX = 1
+        newDirectionX += 1
     }
     directionX = newDirectionX
     directionY = newDirectionY
