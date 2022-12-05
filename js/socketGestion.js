@@ -1,7 +1,4 @@
-const socket = game.socket
-
-socket.on("id", () => {
-})
+const socket = Game.getInstance().socket
 
 socket.on("player-disconnected", (id) => {
     console.log(listOtherPlayers);
