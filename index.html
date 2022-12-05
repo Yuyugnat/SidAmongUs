@@ -21,43 +21,45 @@
         <input type="text" placeholder="no_name">
         <button id="start">Start</button>
     </div>
-
+    
+    <script src="js/socket.js"></script>
     <script src="js/Character.js"></script>
+    <script src="js/map.js"></script>
     <script src="js/game.js"></script>
     <script src="js/socketGestion.js"></script>
     <script>
-        function receiveEvent(event) {
-            // console.log(event.data);
-            event = JSON.parse(event.data);
-            console.log("Type :", event.type);
-            console.log(JSON.parse(event.data));
-            switch (event.type) {
-                case 'id':
-                    eventHandler.onId(event.data);
-                    break
-                case 'players-list':
-                    eventHandler.onPlayersList(JSON.parse(event.data));
-                    break
-                case 'new-player':
-                    eventHandler.onNewPlayer(JSON.parse(event.data));
-                    break
-                case 'player-disconnected':
-                    console.log('launch the event', event.type);
-                    console.log(eventHandler.onPlayerDisconnected);
-                    eventHandler.onPlayerDisconnected(parseInt(event.data));
-                    break
-                case 'move':
-                    eventHandler.onMove(JSON.parse(event.data));
-                    break
-                case 'map':
-                    eventHandler.onMap(JSON.parse(event.data));
-                    break
-            }
-        }
+        // function receiveEvent(event) {
+        //     // console.log(event.data);
+        //     event = JSON.parse(event.data);
+        //     console.log("Type :", event.type);
+        //     console.log(JSON.parse(event.data));
+        //     switch (event.type) {
+        //         case 'id':
+        //             eventHandler.onId(event.data);
+        //             break
+        //         case 'players-list':
+        //             eventHandler.onPlayersList(JSON.parse(event.data));
+        //             break
+        //         case 'new-player':
+        //             eventHandler.onNewPlayer(JSON.parse(event.data));
+        //             break
+        //         case 'player-disconnected':
+        //             console.log('launch the event', event.type);
+        //             console.log(eventHandler.onPlayerDisconnected);
+        //             eventHandler.onPlayerDisconnected(parseInt(event.data));
+        //             break
+        //         case 'move':
+        //             eventHandler.onMove(JSON.parse(event.data));
+        //             break
+        //         case 'map':
+        //             eventHandler.onMap(JSON.parse(event.data));
+        //             break
+        //     }
+        // }
 
-        socket.onmessage = (e) => {
-            receiveEvent(e);
-        }
+        // socket.onmessage = (e) => {
+        //     receiveEvent(e);
+        // }
     </script>
 </body>
 
