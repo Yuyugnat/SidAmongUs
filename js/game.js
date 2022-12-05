@@ -1,213 +1,164 @@
-let map = {
-    fragments: [],
-    buildings: []
-}
-
-const socket = new WebSocket('ws://172.16.20.35:8080/ws')
-
-let eventHandler = {}
-
-eventHandler.onMap = gameMap => {
-    map = gameMap
-    for (mapFragment of map.fragments) {
-        const htmlMapFragment = document.createElement('div')
-        htmlMapFragment.style.top = mapFragment.y + 'px'
-        htmlMapFragment.style.left = mapFragment.x + 'px'
-        htmlMapFragment.style.width = mapFragment.width + 'px'
-        htmlMapFragment.style.height = mapFragment.height + 'px'
-        htmlMapFragment.classList.add('map-fragment')
-        htmlMapFragment.id = 'mf-' + mapFragment.id
-        document.querySelector('main').appendChild(htmlMapFragment)
-    }
-
-    for (building of map.buildings) {
-        const htmlBuilding = document.createElement('img')
-        htmlBuilding.src = building.link
-        htmlBuilding.style.top = building.y + 'px'
-        htmlBuilding.style.left = building.x + 'px'
-        htmlBuilding.style.width = building.width + 'px'
-        htmlBuilding.style.height = building.height + 'px'
-        htmlBuilding.classList.add('building')
-        htmlBuilding.id = 'b-' + building.id
-        document.querySelector('main').appendChild(htmlBuilding)
-    }
-}
-
-function sendToServer(type, data) {
-    socket.send(JSON.stringify({ type: type, data: JSON.stringify(data) }))
-}
-
-socket.addEventListener('open', function (event) {
-    socket.send(JSON.stringify({
-        type: 'test',
-        data: 'hello world'
-    }))
-    // socket.dispatchEvent(new CustomEvent('start'))
-})
-
-console.log(socket);
-
-let boost = 0
-
-var pressedKeys = {
-    'KeyW': false,
-    'KeyA': false,
-    'KeyS': false,
-    'KeyD': false
-};
-
 const pause = (ms) => new Promise(resolve => setTimeout(resolve, ms))
 
-let mainCharacter
+class Game {
 
-const mapWidth = 4300
-const mapHeight = 2900
-const charSize = 50
-const gridSize = 10
+    // singleton
+    static instance =  null
 
-let keyDown = false
+    static mapSize = 500; // en pixel
+    static gridSize = 5;
+    static charSize = 50;
 
-let directionX = 0
-let directionY = 0
-
-let isMoving = false
-
-function checkNextPos(x, y) {
-    let goodXY = false
-    let goodXsizeYsize = false
-    let goodXsizeY = false
-    let goodXYsize = false
-    // console.log("map is " + map.fragments);
-    for (mapFragment of map.fragments) {
-        if (x >= mapFragment.x && y >= mapFragment.y && x <= mapFragment.x + mapFragment.width && y <= mapFragment.y + mapFragment.height) {
-            goodXY = true
-        }
-        if (x + charSize <= mapFragment.x + mapFragment.width && y + charSize <= mapFragment.y + mapFragment.height && x + charSize >= mapFragment.x && y + charSize >= mapFragment.y) {
-            goodXsizeYsize = true
-        }
-        if (x + charSize <= mapFragment.x + mapFragment.width && y <= mapFragment.y + mapFragment.height && x + charSize >= mapFragment.x && y >= mapFragment.y) {
-            goodXsizeY = true
-        }
-        if (x <= mapFragment.x + mapFragment.width && y + charSize <= mapFragment.y + mapFragment.height && x >= mapFragment.x && y + charSize >= mapFragment.y) {
-            goodXYsize = true
-        }
+    constructor() {
+        this.socket = new Socket(new WebSocket('ws://localhost:8080/ws'))
+        this.boost = 0
+        this.pressedKeys = {
+            'KeyW': false,
+            'KeyA': false,
+            'KeyS': false,
+            'KeyD': false
+        };
+        this.mainCharacter = null
+        this.directionX = 0
+        this.directionY = 0
+        this.characterName = ""
+        this.listOtherPlayers = []
     }
-    return goodXY && goodXYsize && goodXsizeY && goodXsizeYsize
-}
+    
+    
+    static getInstance() {
+        if (Game.instance == null) Game.instance = new Game()
+        return Game.instance
+    }
+    
 
-document.addEventListener('keydown', e => {
-    pressedKeys[e.code] = true;
-})
+    setUpSocketListeners() {
+        this.socket.on("map", function (gameMap) {
+            console.log("map is " + this.map.fragments);
+            this.map = new Map(gameMap)
+        })
+        this.socket.on('open', function (event) {
+            socket.send(JSON.stringify({
+                type: 'test',
+                data: 'hello world'
+            }))
+        })
 
-document.addEventListener('keyup', e => {
-    pressedKeys[e.code] = false
-    // check if e is a space
-    if (e.code === 'Space') {
-        let nextX = mainCharacter.x + 300 * directionX
-        let nextY = mainCharacter.y + 300 * directionY
+        this.socket.on("id", id => {
+            this.mainCharacter = new MainCharacter(this.characterName, id)
+            document.getElementById('landingForm').remove()
+            document.querySelector('main').style.filter = 'blur(0px)'
+            socket.send('enter-game', {
+                id: parseInt(id),
+                name: characterName
+            })
+            this.start()
+        })
+    }
+    
 
+    setUpWindowListeners() {
+        document.addEventListener('keydown', e => {
+            this.pressedKeys[e.code] = true;
+        })
+        
+        document.addEventListener('keyup', e => {
+            this.pressedKeys[e.code] = false
+        })
+
+        document.getElementById('start').addEventListener('click', () => {
+            console.log("starting game")
+            this.socket.send('ask-for-id', '')
+            const value = document.getElementById('landingForm').querySelector('input').value
+            this.characterName = value == "" ? 'no_name' : value
+        })
+    }
+
+    
+    
+    async adaptDirection() {
+        this.newDirectionX = 0
+        this.newDirectionY = 0
+        if (this.pressedKeys['KeyW']) {
+            this.newDirectionY = -1
+        }
+        if (this.pressedKeys['KeyS']) {
+            this.newDirectionY = 1
+        }
+        if (this.pressedKeys['KeyA']) {
+            this.newDirectionX = -1
+        }
+        if (this.pressedKeys['KeyD']) {
+            this.newDirectionX = 1
+        }
+        await pause(50)
+        adaptDirection()
+    }
+
+    async gameLoop() {
+
+        let nextX = this.mainCharacter.x + directionX * (gridSize + boost)
+        let nextY = this.mainCharacter.y + directionY * (gridSize + boost)
+    
         if (checkNextPos(nextX, nextY)) {
-            mainCharacter.update(nextX, nextY, directionX, directionY)
+           this.mainCharacter.update(nextX, nextY, directionX, directionY)
         } else if (checkNextPos(nextX, mainCharacter.y)) {
-            mainCharacter.update(nextX, mainCharacter.y, directionX, 0)
+            this.mainCharacter.update(nextX, mainCharacter.y, directionX, 0)
         } else if (checkNextPos(mainCharacter.x, nextY)) {
-            mainCharacter.update(mainCharacter.x, nextY, 0, directionY)
+            this.mainCharacter.update(mainCharacter.x, nextY, 0, directionY)
         }
-    }
-})
-
-async function adaptDirection() {
-    let newDirectionX = 0
-    let newDirectionY = 0
-    if (pressedKeys['KeyW']) {
-        newDirectionY -= 1
-    }
-    if (pressedKeys['KeyS']) {
-        newDirectionY += 1
-    }
-    if (pressedKeys['KeyA']) {
-        newDirectionX -= 1
-    }
-    if (pressedKeys['KeyD']) {
-        newDirectionX += 1
-    }
-    directionX = newDirectionX
-    directionY = newDirectionY
-    await pause(50)
-    adaptDirection()
-}
-
-async function gameLoop() {
-
-    let nextX = mainCharacter.x + directionX * (gridSize + boost)
-    let nextY = mainCharacter.y + directionY * (gridSize + boost)
-
-    if (checkNextPos(nextX, nextY)) {
-        mainCharacter.update(nextX, nextY, directionX, directionY)
-    } else if (checkNextPos(nextX, mainCharacter.y)) {
-        mainCharacter.update(nextX, mainCharacter.y, directionX, 0)
-    } else if (checkNextPos(mainCharacter.x, nextY)) {
-        mainCharacter.update(mainCharacter.x, nextY, 0, directionY)
-    }
-
-    if (directionX == -1) {
-        // mainCharacter.element.style.transition = 'transform 50ms linear'
-        mainCharacter.element.querySelector('img').style.transform = 'scaleX(-1)'
-        // transform 50ms linear
-    } else if (directionX == 1) {
-        mainCharacter.element.querySelector('img').style.transform = 'scaleX(1)'
-        // mainCharacter.element.style.transition = 'transform 50ms linear'
-    }
-
-    for (otherPlayer of listOtherPlayers) {
-        let distanceX = mainCharacter.x - otherPlayer.x
-        let distanceY = mainCharacter.y - otherPlayer.y
-        let distance = Math.sqrt(distanceX * distanceX + distanceY * distanceY)
-
-        if (distance < 250) {
-            otherPlayer.element.style.opacity = 1
-        } else {
-            otherPlayer.element.style.opacity = 0
+    
+        if (directionX == -1) {
+            this.mainCharacter.element.querySelector('img').style.transform = 'rotateY(180deg)'
+        } else if (directionX == 1) {
+            this.mainCharacter.element.querySelector('img').style.transform = 'rotateY(0deg)'
         }
-
-        if (distance < 50) {
-            otherPlayer.close = true
-        } else {
-            otherPlayer.close = false
+    
+        for (otherPlayer of listOtherPlayers) {
+            let distanceX = mainCharacter.x - otherPlayer.x
+            let distanceY = mainCharacter.y - otherPlayer.y
+            let distance = Math.sqrt(distanceX * distanceX + distanceY * distanceY)
+    
+            if (distance < 250) {
+                otherPlayer.element.style.opacity = 1
+            } else {
+                otherPlayer.element.style.opacity = 0
+            }
         }
+    
+        boost = pressedKeys['ShiftLeft'] ? 3 : 0
+        await pause(10)
+        gameLoop()
     }
 
-    boost = pressedKeys['ShiftLeft'] ? 10 : 0
-    await pause(25)
-    gameLoop()
+    async start() {
+        gameLoop()
+        adaptDirection()
+    }
 }
 
-function start() {
-    gameLoop()
-    adaptDirection()
-}
-
-let characterName
-
-document.getElementById('start').addEventListener('click', () => {
-    console.log(start);
-    sendToServer('ask-for-id', '')
-    let value = document.getElementById('landingForm').querySelector('input').value
-    characterName = value == "" ? 'no_name' : value
-})
+const game = Game.getInstance()
 
 
 
 
-eventHandler.onId = id => {
-    mainCharacter = new MainCharacter(characterName, id)
-    document.getElementById('landingForm').remove()
-    document.querySelector('main').style.filter = 'blur(0px)'
-    sendToServer('enter-game', {
-        id: parseInt(id),
-        name: characterName,
-        x: mainCharacter.x,
-        y: mainCharacter.y,
-    })
-    start()
-}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
