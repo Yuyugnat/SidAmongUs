@@ -51,7 +51,6 @@ class GameMap {
 
 
     checkNextPos(x, y) {
-        console.log("postion requested", x, y);
         let goodXY = false
         let goodXsizeYsize = false
         let goodXsizeY = false
@@ -70,7 +69,7 @@ class GameMap {
                 goodXYsize = true
             }
         }
-        console.log('goodXY', goodXY, 'goodXsizeYsize', goodXsizeYsize, 'goodXsizeY', goodXsizeY, 'goodXYsize', goodXYsize);
+
         return goodXY && goodXYsize && goodXsizeY && goodXsizeYsize
     }
 }

@@ -68,7 +68,6 @@ class Game {
             this.map =  GameMap.getInstance(map.fragments,map.buildings)
             this.mainCharacter = new MainCharacter(this.characterName, id)
             const form = document.getElementById('landingForm')
-            console.log(form);
             form.remove()
             document.querySelector('main').style.filter = 'blur(0px)'
             this.socket.send('enter-game', {
@@ -119,7 +118,6 @@ class Game {
         }
         this.directionX = newDirectionX
         this.directionY = newDirectionY
-        console.log("dir",this.newDirectionX, this.newDirectionY);
         await pause(50)
         this.adaptDirection()
     }
@@ -127,7 +125,6 @@ class Game {
     async gameLoop() {
         const mainCharacter = this.mainCharacter
 
-        console.log("jump :" + this.directionX * (Game.gridSize + this.boost));
         let nextX = mainCharacter.x + this.directionX * (Game.gridSize + this.boost)
         let nextY = mainCharacter.y + this.directionY * (Game.gridSize + this.boost)
     

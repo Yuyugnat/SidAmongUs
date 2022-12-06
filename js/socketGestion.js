@@ -31,13 +31,13 @@ socket.on("move", ({id, x, y}) => {
     })
 })
 
-socket.on("move", (playersList) => {
-    console.log("coucou", playersList);
-    playersList.forEach(player => {
-        console.log(player);
-        game.listOtherPlayers.push(new OtherCharacter(player.name, player.id))
-    })
-})
+// socket.on("move", (playersList) => {
+//     console.log("coucou", playersList);
+//     playersList.forEach(player => {
+//         console.log(player);
+//         game.listOtherPlayers.push(new OtherCharacter(player.name, player.id))
+//     })
+// })
 
 /*
 switch (event.type) {

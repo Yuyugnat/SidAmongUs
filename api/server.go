@@ -83,7 +83,12 @@ func main() {
 		for !isClose {
 			// Read message from browser
 			event := &Event{}
-			conn.ReadJSON(&event)
+			err := conn.ReadJSON(&event)
+
+			if err != nil {
+				log.Println("error:", err)
+			}
+
 			if event.Type != "move" {
 				log.Println("Event received :", event)
 			}

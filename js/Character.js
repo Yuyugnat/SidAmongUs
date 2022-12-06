@@ -30,6 +30,7 @@ class Character {
     }
 
     update(x, y) {
+        console.log("updating character", this.id);
         this.x = x
         this.y = y
     }
@@ -61,7 +62,6 @@ class MainCharacter extends Character {
     }
 
     update(x, y, directionX, directionY) {
-        console.log("moving");
         super.update(x, y)
         this.directionX = directionX
         this.directionY = directionY
@@ -86,7 +86,6 @@ class MainCharacter extends Character {
         }
 
         this.element.style.transform = `translate(${ownXTranslation}px, ${ownYTranslation}px)`
-        console.log(`translate(${ownXTranslation}px, ${ownYTranslation}px)`)
 
         document.querySelector('main').style.transform = `translate(${-xTranslation}px, ${-yTranslation}px)`
         if (this.directionX !== 0 || this.directionY !== 0)
@@ -126,7 +125,6 @@ class OtherCharacter extends Character {
     }
 
     update(x, y) {
-        console.log(x, y);
         super.update(x, y)
         this.element.style.transform = `translate(${x}px, ${y}px)`
     }
