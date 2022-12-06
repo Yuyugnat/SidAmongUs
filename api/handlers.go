@@ -12,11 +12,6 @@ type Event struct {
 	Type string `json:"type"`
 	Data string `json:"data"`
 }
-type Move struct {
-	ID int `json:"id"`
-	X  int `json:"x"`
-	Y  int `json:"y"`
-}
 
 type Move struct {
 	ID int `json:"id"`
@@ -151,21 +146,6 @@ func HandlePlayerChat(data string, conn *websocket.Conn) {
 	log.Println("Broadcasting player chat :", string(msgString))
 }
 
-func HandleEvent(event *Event, conn *websocket.Conn) {
-	switch event.Type {
-	case "ask-for-id":
-		HandleAskForID(conn)
-	case "test":
-		HandleTest(event.Data)
-	case "move":
-		HandleMove(event.Data, conn)
-	case "enter-game":
-		HandleEnterGame(event.Data, conn)
-	case "player-disconnected":
-		HandlePlayerDisconnected(event.Data, conn)
-	case "chat-message":
-		HandlePlayerChat(event.Data, conn)
-	}
 func setUpListeners() {
 	eventHandler := GetInstance()
 
@@ -174,4 +154,5 @@ func setUpListeners() {
 	eventHandler.on("move", HandleMove)
 	eventHandler.on("enter-game", HandleEnterGame)
 	eventHandler.on("player-disconnected", HandlePlayerDisconnected)
+	eventHandler.on("chat-message", HandlePlayerChat)
 }

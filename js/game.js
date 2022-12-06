@@ -61,7 +61,7 @@ class Game {
 
     setUpSocketListeners() {
         this.socket.on("player-info", function (playerInfo) {
-            const  {id} = playerInfo
+            const {id} = playerInfo
             const map = JSON.parse(playerInfo.map)
             console.log("player info received", playerInfo);
             
@@ -83,12 +83,16 @@ class Game {
     
 
     setUpWindowListeners() {
-        document.addEventListener('keydown', e => {
+        window.addEventListener('keydown', e => {
             this.pressedKeys[e.code] = true;
         })
         
-        document.addEventListener('keyup', e => {
+        window.addEventListener('keyup', e => {
             this.pressedKeys[e.code] = false
+
+            if (e.code == 'Enter') {
+                Chat.handlePressEnter()
+            }
         })
 
         document.getElementById('start').addEventListener('click', () => {

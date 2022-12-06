@@ -31,7 +31,7 @@ socket.on("move", ({id, x, y}) => {
     })
 })
 
-eventHandler.onPlayerDisconnected = (id) => {
+socket.on('player-disconnected', id => {
     console.log(listOtherPlayers);
     listOtherPlayers.forEach(player => {
         if (player.id == id) {
@@ -39,9 +39,9 @@ eventHandler.onPlayerDisconnected = (id) => {
             player.element.remove()
         }
     })
-}
+})
 
-eventHandler.onChatMessage = ({id, message, x, y}) => {
+socket.on('chat-message', ({id, message, x, y}) => {
     const dom = document.createElement('div');
     const xDiff = mainCharacter.x - x;
     const yDiff =  mainCharacter.y - y;
@@ -62,7 +62,7 @@ eventHandler.onChatMessage = ({id, message, x, y}) => {
     setTimeout(() => {
         dom.remove();
     }, 2000);
-}
+})
 // socket.on("move", (playersList) => {
 //     console.log("coucou", playersList);
 //     playersList.forEach(player => {

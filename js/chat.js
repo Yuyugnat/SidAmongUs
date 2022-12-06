@@ -4,13 +4,14 @@ class Chat {
     static isChatOpened = false;
 
     static handlePressEnter() {
+        console.log('enter');
         if (Chat.isChatOpened) {
             Chat.isChatOpened = false;
             Chat.input.style.display = 'none';
             const message = Chat.message.value;
             Chat.message.value = '';
-            sendToServer('chat-message', {
-                id: parseInt(mainCharacter.id),
+            Game.getInstance()?.socket.send('chat-message', {
+                id: parseInt(Game.getInstance()?.mainCharacter.id),
                 message
             })
         } else {
