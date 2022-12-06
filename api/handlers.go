@@ -115,8 +115,8 @@ func HandlePlayerDisconnected(data string, conn *websocket.Conn) {
 	fmt.Println("playerlist:", PlayersList)
 }
 
-func setUpListeners(c *websocket.Conn) {
-	eventHandler := GetInstance(c)
+func setUpListeners() {
+	eventHandler := GetInstance()
 
 	eventHandler.on("ask-for-id", HandleAskForID)
 	eventHandler.on("test", HandleTest)

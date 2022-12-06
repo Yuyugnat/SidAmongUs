@@ -12,20 +12,18 @@ var (
 )
 
 type EventHandler struct {
-	conn      *websocket.Conn
 	functions map[string]func(data string, c *websocket.Conn)
 }
 
-func newEventHandler(c *websocket.Conn) *EventHandler {
+func newEventHandler() *EventHandler {
 	return &EventHandler{
-		conn:      c,
 		functions: map[string]func(data string, c *websocket.Conn){},
 	}
 }
 
-func GetInstance(c *websocket.Conn) *EventHandler {
+func GetInstance() *EventHandler {
 	once.Do(func() {
-		instance = newEventHandler(c)
+		instance = newEventHandler()
 	})
 	return instance
 }
@@ -34,6 +32,6 @@ func (e *EventHandler) on(event string, f func(string, *websocket.Conn)) {
 	e.functions[event] = f
 }
 
-func (e *EventHandler) onClientEvent(ev Event) {
-	e.functions[ev.Type](ev.Data, e.conn)
+func (e *EventHandler) onClientEvent(ev Event, c *websocket.Conn) {
+	e.functions[ev.Type](ev.Data, c)
 }
