@@ -15,7 +15,6 @@ type connection struct {
 	// The hub.
 	h *hub
 }
-
 type hub struct {
 	// Registered connections. That's a connection pool
 	connections map[*connection]bool
@@ -71,20 +70,29 @@ func main() {
 				Type: "player-disconnected",
 				Data: fmt.Sprint(id),
 			}, conn)
+			PlayersList = append(PlayersList[:id], PlayersList[id+1:]...)
+			NbPlayers -= 1
 			isClose = true
 			return nil
 		})
 
 		log.Println("Client connected")
 
+		setUpListeners()
+
 		for !isClose {
 			// Read message from browser
 			event := &Event{}
-			conn.ReadJSON(&event)
+			err := conn.ReadJSON(&event)
+
+			if err != nil {
+				log.Println("error:", err)
+			}
+
 			if event.Type != "move" {
 				log.Println("Event received :", event)
 			}
-			HandleEvent(event, conn)
+			GetInstance().onClientEvent(*event, conn)
 		}
 		fmt.Println("Client disconnected")
 		conn.Close()

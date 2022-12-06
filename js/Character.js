@@ -1,4 +1,5 @@
 class Character {
+
     constructor(name, id) {
         this.name = name
         this.id = id
@@ -29,6 +30,7 @@ class Character {
     }
 
     update(x, y) {
+        console.log("updating character", this.id);
         this.x = x
         this.y = y
     }
@@ -63,9 +65,31 @@ class MainCharacter extends Character {
         super.update(x, y)
         this.directionX = directionX
         this.directionY = directionY
-        document.querySelector('main').style.transform = `translate(${-x}px, ${-y}px)`
+        let xTranslation = x
+        let yTranslation = y
+        let ownXTranslation = 0
+        let ownYTranslation = 0
+        if (this.x < window.innerWidth / 2) {
+            xTranslation = window.innerWidth / 2
+            ownXTranslation = this.x - window.innerWidth / 2
+        } else if (this.x + Game.charSize > Game.mapWidth - window.innerWidth / 2) {
+            xTranslation = Game.mapWidth - window.innerWidth / 2 - Game.charSize
+            ownXTranslation = this.x - (Game.mapWidth - window.innerWidth / 2) + Game.charSize
+        }
+       
+        if (this.y < window.innerHeight / 2) {
+            yTranslation = window.innerHeight / 2
+            ownYTranslation = this.y - window.innerHeight / 2
+        } else if (this.y + Game.charSize > Game.mapHeight - window.innerHeight / 2) {
+            yTranslation = Game.mapHeight - window.innerHeight / 2 - Game.charSize
+            ownYTranslation = this.y - (Game.mapHeight - window.innerHeight / 2) + Game.charSize
+        }
+
+        this.element.style.transform = `translate(${ownXTranslation}px, ${ownYTranslation}px)`
+
+        document.querySelector('main').style.transform = `translate(${-xTranslation}px, ${-yTranslation}px)`
         if (this.directionX !== 0 || this.directionY !== 0)
-            sendToServer('move', {
+            Game.getInstance()?.socket.send('move', {
                 id: this.id,
                 x: this.x,
                 y: this.y,
@@ -77,6 +101,7 @@ class OtherCharacter extends Character {
     constructor(name, id) {
         super(name, id)
         this.create()
+        this.close = false
     }
 
     create() {
@@ -88,10 +113,18 @@ class OtherCharacter extends Character {
     render() {
         super.render()
         document.querySelector('main').appendChild(this.element)
+        this.element.addEventListener('click', () => {
+            console.log('click');
+        })
+        this.element.addEventListener('mouseover', () => {
+            console.log('over');
+            if (this.close) {
+                this.element.classList.add('clickable')
+            }
+        })
     }
 
     update(x, y) {
-        console.log(x, y);
         super.update(x, y)
         this.element.style.transform = `translate(${x}px, ${y}px)`
     }

@@ -19,6 +19,7 @@ main {
     position: fixed;
     top: calc(50vh - 25px);
     left: calc(50vw - 25px);
+    transition: transform 50ms linear;
 }
 
 .name {
@@ -40,12 +41,14 @@ main {
     width: 50px;
     z-index: 3;
     position: relative;
+    transition: transform 50ms linear;
 }
 
 .main-character {
     position: fixed;
     top: calc(50vh - 25px);
     left: calc(50vw - 25px);
+    transition: transform 50ms linear;
 }
 
 .main-character > .shadow {
@@ -80,6 +83,12 @@ main {
     background-size: 50px;
     position: absolute;
     /* outline: solid 10px red; */
+}
+
+.clickable {
+    cursor: pointer;
+    box-shadow: yellow;
+    filter: drop-shadow(0 0 0.5rem yellow);
 }
 
 .building {

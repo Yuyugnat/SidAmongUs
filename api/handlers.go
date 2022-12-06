@@ -12,6 +12,11 @@ type Event struct {
 	Type string `json:"type"`
 	Data string `json:"data"`
 }
+type Move struct {
+	ID int `json:"id"`
+	X  int `json:"x"`
+	Y  int `json:"y"`
+}
 
 type Move struct {
 	ID int `json:"id"`
@@ -27,11 +32,16 @@ func BroadcastEvent(event *Event, conn *websocket.Conn) {
 	}
 }
 
-func HandleTest(data string) {
+func HandleTest(data string, _ *websocket.Conn) {
 	log.Println("Handling test :", data)
 }
 
-func HandleAskForID(conn *websocket.Conn) {
+type AskIdData struct {
+	Id  int    `json:"id"`
+	Map string `json:"map"`
+}
+
+func HandleAskForID(_ string, conn *websocket.Conn) {
 	log.Println("Handling ask for id")
 	id := NbPlayers
 	NbPlayers += 1
@@ -43,9 +53,14 @@ func HandleAskForID(conn *websocket.Conn) {
 
 	jsonMap, _ := json.Marshal(Gamemap)
 
+	dataMap, _ := json.Marshal(AskIdData{
+		Id:  id,
+		Map: string(jsonMap),
+	})
+
 	conn.WriteJSON(Event{
-		Type: "map",
-		Data: string(jsonMap),
+		Type: "player-info",
+		Data: string(dataMap),
 	})
 }
 
@@ -98,16 +113,13 @@ func HandlePlayerDisconnected(data string, conn *websocket.Conn) {
 		Data: data,
 	}, conn)
 	// remove the player from the player list
-	id := -1
 	for i, player := range PlayersList {
 		if player.Conn == conn {
-			id = i
+			PlayersList = append(PlayersList[:i], PlayersList[i+1:]...)
 		}
 	}
-	PlayersList = append(PlayersList[:id], PlayersList[id+1:]...)
-	NbPlayers -= 1
+	fmt.Println("playerlist:", PlayersList)
 }
-
 func HandlePlayerChat(data string, conn *websocket.Conn) {
 	log.Println("Handling player chat :", data)
 
@@ -154,4 +166,12 @@ func HandleEvent(event *Event, conn *websocket.Conn) {
 	case "chat-message":
 		HandlePlayerChat(event.Data, conn)
 	}
+func setUpListeners() {
+	eventHandler := GetInstance()
+
+	eventHandler.on("ask-for-id", HandleAskForID)
+	eventHandler.on("test", HandleTest)
+	eventHandler.on("move", HandleMove)
+	eventHandler.on("enter-game", HandleEnterGame)
+	eventHandler.on("player-disconnected", HandlePlayerDisconnected)
 }

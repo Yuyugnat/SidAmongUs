@@ -1,25 +1,35 @@
-let listOtherPlayers = []
+const socket = game.socket
 
-eventHandler.onPlayersList = (playersList) => {
-    console.log("coucou", playersList);
+socket.on("player-disconnected", (id) => {
+    console.log(listOtherPlayers);
+    listOtherPlayers.forEach(player => {
+        if (player.id == id) {
+            console.log(player);
+            player.element.remove()
+        }
+    })
+})
+
+socket.on("players-list", (playersList) => {
+    console.log("players-list", playersList);
     playersList.forEach(player => {
         console.log(player);
-        listOtherPlayers.push(new OtherCharacter(player.name, player.id))
+        game.listOtherPlayers.push(new OtherCharacter(player.name, player.id))
     })
-}
+})
 
-eventHandler.onNewPlayer = ({name, id}) => {
+socket.on("new-player", ({name, id}) => {
     console.log("un nouveau joueur");
-    listOtherPlayers.push(new OtherCharacter(name, id))
-}
+    game.listOtherPlayers.push(new OtherCharacter(name, id))
+})
 
-eventHandler.onMove = ({id, x, y}) => {
-    listOtherPlayers.forEach(player => {
+socket.on("move", ({id, x, y}) => {
+    game.listOtherPlayers.forEach(player => {
         if (player.id == id) {
             player.update(x, y)
         }
     })
-}
+})
 
 eventHandler.onPlayerDisconnected = (id) => {
     console.log(listOtherPlayers);
@@ -53,3 +63,35 @@ eventHandler.onChatMessage = ({id, message, x, y}) => {
         dom.remove();
     }, 2000);
 }
+// socket.on("move", (playersList) => {
+//     console.log("coucou", playersList);
+//     playersList.forEach(player => {
+//         console.log(player);
+//         game.listOtherPlayers.push(new OtherCharacter(player.name, player.id))
+//     })
+// })
+
+/*
+switch (event.type) {
+                case 'id':
+                    eventHandler.onId(event.data);
+                    break
+                case 'players-list':
+                    eventHandler.onPlayersList(JSON.parse(event.data));
+                    break
+                case 'new-player':
+                    eventHandler.onNewPlayer(JSON.parse(event.data));
+                    break
+                case 'player-disconnected':
+                    console.log('launch the event', event.type);
+                    console.log(eventHandler.onPlayerDisconnected);
+                    eventHandler.onPlayerDisconnected(parseInt(event.data));
+                    break
+                case 'move':
+                    eventHandler.onMove(JSON.parse(event.data));
+                    break
+                case 'map':
+                    eventHandler.onMap(JSON.parse(event.data));
+                    break
+            }
+*/
