@@ -77,6 +77,8 @@ func main() {
 		})
 
 		log.Println("Client connected")
+		eventHandler := GetInstance(conn)
+		setUpListeners(conn)
 
 		for !isClose {
 			// Read message from browser
@@ -85,7 +87,7 @@ func main() {
 			if event.Type != "move" {
 				log.Println("Event received :", event)
 			}
-			HandleEvent(event, conn)
+			eventHandler.onClientEvent(*event)
 		}
 		fmt.Println("Client disconnected")
 		conn.Close()

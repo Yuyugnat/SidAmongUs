@@ -26,7 +26,7 @@ func BroadcastEvent(event *Event, conn *websocket.Conn) {
 	}
 }
 
-func HandleTest(data string) {
+func HandleTest(data string, _ *websocket.Conn) {
 	log.Println("Handling test :", data)
 }
 
@@ -35,7 +35,7 @@ type AskIdData struct {
 	Map string `json:"map"`
 }
 
-func HandleAskForID(conn *websocket.Conn) {
+func HandleAskForID(_ string, conn *websocket.Conn) {
 	log.Println("Handling ask for id")
 	id := NbPlayers
 	NbPlayers += 1
@@ -115,17 +115,12 @@ func HandlePlayerDisconnected(data string, conn *websocket.Conn) {
 	fmt.Println("playerlist:", PlayersList)
 }
 
-func HandleEvent(event *Event, conn *websocket.Conn) {
-	switch event.Type {
-	case "ask-for-id":
-		HandleAskForID(conn)
-	case "test":
-		HandleTest(event.Data)
-	case "move":
-		HandleMove(event.Data, conn)
-	case "enter-game":
-		HandleEnterGame(event.Data, conn)
-	case "player-disconnected":
-		HandlePlayerDisconnected(event.Data, conn)
-	}
+func setUpListeners(c *websocket.Conn) {
+	eventHandler := GetInstance(c)
+
+	eventHandler.on("ask-for-id", HandleAskForID)
+	eventHandler.on("test", HandleTest)
+	eventHandler.on("move", HandleMove)
+	eventHandler.on("enter-game", HandleEnterGame)
+	eventHandler.on("player-disconnected", HandlePlayerDisconnected)
 }
