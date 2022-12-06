@@ -18,6 +18,12 @@ type Move struct {
 	Y  int `json:"y"`
 }
 
+type Move struct {
+	ID int `json:"id"`
+	X  int `json:"x"`
+	Y  int `json:"y"`
+}
+
 func BroadcastEvent(event *Event, conn *websocket.Conn) {
 	for c := range h.connections {
 		if c.ws != conn {
@@ -114,7 +120,52 @@ func HandlePlayerDisconnected(data string, conn *websocket.Conn) {
 	}
 	fmt.Println("playerlist:", PlayersList)
 }
+func HandlePlayerChat(data string, conn *websocket.Conn) {
+	log.Println("Handling player chat :", data)
 
+	messageData := &IncommingMessage{}
+	json.Unmarshal([]byte(data), messageData)
+	player := PlayersList[messageData.ID]
+
+	broadcastMessageData := &BroadcastMessage{
+		ID:      messageData.ID,
+		X:       player.X,
+		Y:       player.Y,
+		Message: messageData.Message,
+	}
+
+	msgString, _ := json.Marshal(broadcastMessageData)
+
+	log.Println(string(msgString))
+
+	conn.WriteJSON(Event{
+		Type: "player-chat",
+		Data: string(msgString),
+	})
+
+	BroadcastEvent(&Event{
+		Type: "player-chat",
+		Data: string(msgString),
+	}, conn)
+
+	log.Println("Broadcasting player chat :", string(msgString))
+}
+
+func HandleEvent(event *Event, conn *websocket.Conn) {
+	switch event.Type {
+	case "ask-for-id":
+		HandleAskForID(conn)
+	case "test":
+		HandleTest(event.Data)
+	case "move":
+		HandleMove(event.Data, conn)
+	case "enter-game":
+		HandleEnterGame(event.Data, conn)
+	case "player-disconnected":
+		HandlePlayerDisconnected(event.Data, conn)
+	case "chat-message":
+		HandlePlayerChat(event.Data, conn)
+	}
 func setUpListeners() {
 	eventHandler := GetInstance()
 

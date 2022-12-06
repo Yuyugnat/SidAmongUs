@@ -167,6 +167,7 @@ class Game {
         this.gameLoop()
     }
 
+
     init() {
         this.setUpWindowListeners()
         this.setUpSocketListeners()
@@ -179,10 +180,6 @@ class Game {
 }
 
 const game = Game.getInstance()
-
-
-
-
 
 
 

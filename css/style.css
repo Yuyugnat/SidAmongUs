@@ -128,3 +128,44 @@ main {
     font-size: 20px;
     cursor: pointer;
 }
+
+#chat {
+    width: 200px;
+    position: fixed;
+    bottom: 20px;
+    left: calc(50% - 140px);
+    display: none;
+    background-color: white;
+    padding: 10px;
+    border-radius: 5px;
+    z-index: 10;
+}
+
+#chat > input {
+    width: 100%;
+    font-size: 16px;
+    height: 50px;
+    background-color: transparent;
+    border: none;
+    border-radius: 5px;
+    padding: 0 10px;
+    font-size: 20px;
+}
+
+.chat-message {
+    max-width: 400px;
+    height: max-content;
+    width: max-content;
+    font-weight: 600;
+    font-family: 'Roboto', sans-serif;
+    border-radius: 20px;
+    position: absolute;
+    padding: 5px 10px;
+    font-size: 16px;
+    color: black;
+    border: 2px solid rgb(165, 165, 165);
+    background-color: white;
+    animation: ease-in-out;
+    animation-duration: 0.5s;
+    transition-duration: .5s;
+}
