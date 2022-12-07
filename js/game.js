@@ -33,31 +33,6 @@ class Game {
         if (Game.instance == null) Game.instance = new Game()
         return Game.instance
     }
-    
-
-    // setUpSocketListeners() {
-    //     this.socket.on("map", function (gameMap) {
-    //         console.log("map received", gameMap);
-    //         this.map =  GameMap.getInstance(gameMap.fragments,gameMap.buildings)
-    //         console.log("map created");
-    //     })
-
-    //     this.socket.on("id", function (id) {
-    //         console.log("id received");
-    //         this.mainCharacter = new MainCharacter(this.characterName, id)
-    //         const form = document.getElementById('landingForm')
-    //         console.log(form);
-    //         form.remove()
-    //         document.querySelector('main').style.filter = 'blur(0px)'
-    //         this.socket.send('enter-game', {
-    //             id: parseInt(id),
-    //             name: this.characterName,
-    //             x: this.mainCharacter.x,
-    //             y: this.mainCharacter.y,
-    //         })
-    //         this.start()
-    //     })
-    // }
 
     setUpSocketListeners() {
         this.socket.on("player-info", function (playerInfo) {
