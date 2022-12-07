@@ -98,7 +98,7 @@ func main() {
 		conn.Close()
 	})
 
-	http.Handle("/", http.FileServer(http.Dir("./")))
+	http.Handle("/", http.FileServer(http.Dir("./public/")))
 
 	log.Println("Starting server on :8080")
 	log.Println("Open http://localhost:8080/ in your browser")
