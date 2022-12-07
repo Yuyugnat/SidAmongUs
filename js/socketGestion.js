@@ -43,21 +43,18 @@ socket.on('player-disconnected', id => {
 
 socket.on('player-chat', ({id, message, x, y}) => {
     const dom = document.createElement('div');
-    const xDiff = game.mainCharacter.x - x;
-    const yDiff =  game.mainCharacter.y - y;
-    const distance = Math.sqrt(xDiff * xDiff + yDiff * yDiff);
-
-    if (distance >= 250) return;
-
-    const sender = game.listOtherPlayers.find(player => player.id === id);
-    console.log('DISPLAY')
+    const sender = game.listOtherPlayers.find(player => player.id === id) || game.mainCharacter;
+    console.log(sender);
+    if (!sender.isInPlayerRange()) {
+        console.log('NO')
+        return;
+    } 
     
     dom.innerHTML = message;
     dom.className = 'chat-message';
-    dom.style.left = sender.x + 'px';
-    dom.style.top = sender.y - 50 + 'px';
     dom.style.zIndex = 10;
-    document.getElementsByTagName('main')[0].appendChild(dom);
+    
+    sender.chatbox.appendChild(dom);
 
     setTimeout(() => {
         dom.remove();

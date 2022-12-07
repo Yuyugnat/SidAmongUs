@@ -16,13 +16,28 @@ class Character {
         this.element = document.createElement('div')
         this.element.id = `character-${this.id}`
         this.element.classList.add('character')
-        let img = document.createElement('img')
+
+        const img = document.createElement('img')
         img.src = this.imgLink
         this.element.appendChild(img)
-        let name = document.createElement('div')
+
+        const name = document.createElement('div')
         name.classList.add('name')
         name.innerText = this.name
         this.element.appendChild(name)
+
+        const chatbox = document.createElement('div')
+        chatbox.classList.add('flex--column')
+        chatbox.classList.add('chatbox')
+        this.element.appendChild(chatbox);
+        this.chatbox = chatbox;
+    }
+
+    isInPlayerRange() {
+        const xDiff = game.mainCharacter.x - this.x;
+        const yDiff =  game.mainCharacter.y - this.y;
+        const distance = Math.sqrt(xDiff * xDiff + yDiff * yDiff);
+        return distance < 250;
     }
 
     render() {

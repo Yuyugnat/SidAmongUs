@@ -152,6 +152,14 @@ main {
     font-size: 20px;
 }
 
+.chatbox {
+    justify-content: center;
+    align-items: center;
+    position: absolute;
+    top: -70px;
+    left: 0px;
+}
+
 .chat-message {
     max-width: 400px;
     height: max-content;

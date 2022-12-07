@@ -11,7 +11,7 @@ class Game {
     static charSize = 50;
 
     constructor() {
-        this.socket = Socket.getInstance(new WebSocket('ws://localhost:8080/ws'))
+        this.socket = Socket.getInstance(new WebSocket('ws://172.16.20.183:8080/ws'))
         this.boost = 0
         this.pressedKeys = {
             'KeyW': false,
@@ -59,15 +59,14 @@ class Game {
 
     setUpWindowListeners() {
         window.addEventListener('keydown', e => {
-            this.pressedKeys[e.code] = true;
+            if (e.code == 'Enter') {
+                Chat.handlePressEnter()
+            }
+            if (!Chat.isChatOpened) this.pressedKeys[e.code] = true;
         })
         
         window.addEventListener('keyup', e => {
             this.pressedKeys[e.code] = false
-
-            if (e.code == 'Enter') {
-                Chat.handlePressEnter()
-            }
         })
 
         document.getElementById('start').addEventListener('click', () => {

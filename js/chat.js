@@ -20,8 +20,4 @@ class Chat {
             Chat.message.focus();
         }
     }
-
-    static handleMessageReceived(messageProps) {
-
-    }
 }
