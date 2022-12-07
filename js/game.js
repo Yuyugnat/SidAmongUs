@@ -4,7 +4,7 @@ import { Socket } from "./socket.js";
 
 const pause = (ms) => new Promise(resolve => setTimeout(resolve, ms))
 
-class Game {
+export class Game {
 
     // singleton
     static instance =  null

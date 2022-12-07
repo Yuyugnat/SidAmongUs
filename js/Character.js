@@ -1,3 +1,5 @@
+import { Game } from './Game.js'
+
 export class Character {
 
     constructor(name, id) {

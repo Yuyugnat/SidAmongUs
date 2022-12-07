@@ -1,4 +1,4 @@
-class Chat {
+export class Chat {
     static input = document.getElementById('chat');
     static message = document.getElementById('message');
     static isChatOpened = false;

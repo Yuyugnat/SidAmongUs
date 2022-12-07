@@ -1,4 +1,12 @@
+import { Game } from "./game.js";
+
+const game = Game.getInstance()
 const socket = game.socket
+
+export class EventHandlers {
+
+}
+
 
 socket.on("player-disconnected", (id) => {
     console.log(listOtherPlayers);
