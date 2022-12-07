@@ -41,7 +41,7 @@ class Game {
             console.log("player info received", playerInfo);
             
             this.map =  GameMap.getInstance(map.fragments,map.buildings)
-            this.mainCharacter = new MainCharacter(this.characterName, id)
+            this.mainCharacter = new MainCharacter(this.characterName, parseInt(id))
             const form = document.getElementById('landingForm')
             form.remove()
             document.querySelector('main').style.filter = 'blur(0px)'
