@@ -84,13 +84,6 @@ func HandleEnterGame(data string, conn *websocket.Conn) {
 	playerData.Conn = conn
 	fmt.Println(playerData)
 
-	jsonPlayersList, _ := json.Marshal(PlayersList)
-
-	conn.WriteJSON(Event{
-		Type: "players-list",
-		Data: string(jsonPlayersList),
-	})
-
 	PlayersList = append(PlayersList, *playerData)
 	log.Println("Handling enter game :", data)
 	log.Println("Players list :", PlayersList)

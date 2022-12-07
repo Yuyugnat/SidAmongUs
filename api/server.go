@@ -1,6 +1,7 @@
 package main
 
 import (
+	"encoding/json"
 	"fmt"
 	"log"
 	"net/http"
@@ -77,6 +78,13 @@ func main() {
 		})
 
 		log.Println("Client connected")
+
+		jsonPlayersList, _ := json.Marshal(PlayersList)
+
+		conn.WriteJSON(Event{
+			Type: "players-list",
+			Data: string(jsonPlayersList),
+		})
 
 		setUpListeners()
 

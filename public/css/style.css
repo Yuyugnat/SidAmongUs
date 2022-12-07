@@ -1,3 +1,7 @@
+* {
+    font-family: 'Roboto', sans-serif;
+}
+
 body {
     height: 100vh;
     width: 100vw;
@@ -22,12 +26,22 @@ main {
     transition: transform 50ms linear;
 }
 
+.flex--row {
+    display: flex;
+    flex-direction: row;
+}
+
+.flex--column {
+    display: flex;
+    flex-direction: column;
+}
+
 .name {
     position: absolute;
     top: -30px;
     left: 50%;
     transform: translate(-50%, -50%);
-    font-family: 'Roboto', sans-serif;
+    
     font-size: 10px;
     color: white;
     text-align: center;
@@ -150,6 +164,14 @@ main {
     border-radius: 5px;
     padding: 0 10px;
     font-size: 20px;
+}
+
+.chatbox {
+    justify-content: center;
+    align-items: center;
+    position: absolute;
+    top: -70px;
+    left: 0px;
 }
 
 .chat-message {
