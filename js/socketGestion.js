@@ -1,8 +1,7 @@
 const socket = game.socket
 
 socket.on("player-disconnected", (id) => {
-    console.log(listOtherPlayers);
-    listOtherPlayers.forEach(player => {
+    game.listOtherPlayers.forEach(player => {
         if (player.id == id) {
             console.log(player);
             player.element.remove()
@@ -13,14 +12,18 @@ socket.on("player-disconnected", (id) => {
 socket.on("players-list", (playersList) => {
     console.log("players-list", playersList);
     playersList.forEach(player => {
-        console.log(player);
-        game.listOtherPlayers.push(new OtherCharacter(player.name, player.id))
+        //CREATION DE PLAYER POUR L'INTERFACE
+        const tmp = new OtherCharacter(player.name, player.id)
+        addPlayerOnDisplay(tmp);
+        game.listOtherPlayers.push(tmp);
     })
 })
 
 socket.on("new-player", ({name, id}) => {
     console.log("un nouveau joueur");
-    game.listOtherPlayers.push(new OtherCharacter(name, id))
+    const tmp = new OtherCharacter(name, id)
+    addPlayerOnDisplay(tmp);
+    game.listOtherPlayers.push(tmp)
 })
 
 socket.on("move", ({id, x, y}) => {
@@ -32,8 +35,8 @@ socket.on("move", ({id, x, y}) => {
 })
 
 socket.on('player-disconnected', id => {
-    console.log(listOtherPlayers);
-    listOtherPlayers.forEach(player => {
+    document.getElementById('player-display-' + id).remove();
+    game.listOtherPlayers.forEach(player => {
         if (player.id == id) {
             console.log(player);
             player.element.remove()
@@ -43,21 +46,18 @@ socket.on('player-disconnected', id => {
 
 socket.on('player-chat', ({id, message, x, y}) => {
     const dom = document.createElement('div');
-    const xDiff = game.mainCharacter.x - x;
-    const yDiff =  game.mainCharacter.y - y;
-    const distance = Math.sqrt(xDiff * xDiff + yDiff * yDiff);
-
-    if (distance >= 250) return;
-
-    const sender = game.listOtherPlayers.find(player => player.id === id);
-    console.log('DISPLAY')
+    const sender = game.listOtherPlayers.find(player => player.id === id) || game.mainCharacter;
+    console.log(sender);
+    if (!sender.isInPlayerRange()) {
+        console.log('NO')
+        return;
+    } 
     
     dom.innerHTML = message;
     dom.className = 'chat-message';
-    dom.style.left = sender.x + 'px';
-    dom.style.top = sender.y - 50 + 'px';
     dom.style.zIndex = 10;
-    document.getElementsByTagName('main')[0].appendChild(dom);
+    
+    sender.chatbox.appendChild(dom);
 
     setTimeout(() => {
         dom.remove();

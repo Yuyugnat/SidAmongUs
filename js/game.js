@@ -11,7 +11,7 @@ class Game {
     static charSize = 50;
 
     constructor() {
-        this.socket = Socket.getInstance(new WebSocket('ws://localhost:8080/ws'))
+        this.socket = Socket.getInstance(new WebSocket('ws://172.16.20.183:8080/ws'))
         this.boost = 0
         this.pressedKeys = {
             'KeyW': false,
@@ -41,8 +41,8 @@ class Game {
             console.log("player info received", playerInfo);
             
             this.map =  GameMap.getInstance(map.fragments,map.buildings)
-            this.mainCharacter = new MainCharacter(this.characterName, parseInt(id))
-            const form = document.getElementById('landingForm')
+            this.mainCharacter = new MainCharacter(this.characterName, id)
+            const form = document.getElementById('startScreen')
             form.remove()
             document.querySelector('main').style.filter = 'blur(0px)'
             this.socket.send('enter-game', {
@@ -59,21 +59,21 @@ class Game {
 
     setUpWindowListeners() {
         window.addEventListener('keydown', e => {
-            this.pressedKeys[e.code] = true;
+            if (e.code == 'Enter') {
+                Chat.handlePressEnter()
+            }
+            if (!Chat.isChatOpened) this.pressedKeys[e.code] = true;
         })
         
         window.addEventListener('keyup', e => {
             this.pressedKeys[e.code] = false
-
-            if (e.code == 'Enter') {
-                Chat.handlePressEnter()
-            }
         })
 
         document.getElementById('start').addEventListener('click', () => {
+            document.getElementsByTagName('main')[0].style.display = 'block';
             console.log("starting game")
             this.socket.send('ask-for-id', '')
-            const value = document.getElementById('landingForm').querySelector('input').value
+            const value = document.getElementById('startScreen').querySelector('input').value
             this.characterName = value == "" ? 'no_name' : value
         })
     }

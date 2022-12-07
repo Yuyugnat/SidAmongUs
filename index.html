@@ -6,23 +6,37 @@
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Document</title>
-    <link rel="stylesheet" href="css/style.css">
-
+    <style>
+        @import url('css/style.css');
+        @import url('css/landing.css');
+    </style>
 </head>
 
 <body>
     <main style="filter: blur(5px)">
     </main>
 
-    <div id="landingForm">
-        <input type="text" placeholder="no_name">
-        <button id="start">Start</button>
+    <div class="flex--row" id="startScreen">
+        <div class="flex--column container">
+            <div class="flex--column head">
+                <h1>Sidamongus</h1>
+                <h3>A Sète Supremacy production</h3>
+            </div>
+            <input type="text" placeholder="no_name">
+            <button id="start">Start</button>
+        </div>
+
+        <div class="flex--column playerList" id="playerListDisplay">
+            <div class="flex--column head">
+                <h3>Joueurs connectés</h3>
+            </div>
+        </div>
     </div>
 
     <div className="chat--input" id="chat">
         <input type="text" placeholder="Enter a message" id="message">
     </div>
-    
+    <script src="js/interface.js"></script>
     <script src="js/socket.js"></script>
     <script src="js/Character.js"></script>
     <script src="js/map.js"></script>
