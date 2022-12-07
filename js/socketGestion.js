@@ -1,8 +1,7 @@
 const socket = game.socket
 
 socket.on("player-disconnected", (id) => {
-    console.log(listOtherPlayers);
-    listOtherPlayers.forEach(player => {
+    game.listOtherPlayers.forEach(player => {
         if (player.id == id) {
             console.log(player);
             player.element.remove()
@@ -13,14 +12,18 @@ socket.on("player-disconnected", (id) => {
 socket.on("players-list", (playersList) => {
     console.log("players-list", playersList);
     playersList.forEach(player => {
-        console.log(player);
-        game.listOtherPlayers.push(new OtherCharacter(player.name, player.id))
+        //CREATION DE PLAYER POUR L'INTERFACE
+        const tmp = new OtherCharacter(player.name, player.id)
+        addPlayerOnDisplay(tmp);
+        game.listOtherPlayers.push(tmp);
     })
 })
 
 socket.on("new-player", ({name, id}) => {
     console.log("un nouveau joueur");
-    game.listOtherPlayers.push(new OtherCharacter(name, id))
+    const tmp = new OtherCharacter(name, id)
+    addPlayerOnDisplay(tmp);
+    game.listOtherPlayers.push(tmp)
 })
 
 socket.on("move", ({id, x, y}) => {
@@ -32,8 +35,8 @@ socket.on("move", ({id, x, y}) => {
 })
 
 socket.on('player-disconnected', id => {
-    console.log(listOtherPlayers);
-    listOtherPlayers.forEach(player => {
+    document.getElementById('player-display-' + id).remove();
+    game.listOtherPlayers.forEach(player => {
         if (player.id == id) {
             console.log(player);
             player.element.remove()

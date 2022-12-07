@@ -42,7 +42,7 @@ class Game {
             
             this.map =  GameMap.getInstance(map.fragments,map.buildings)
             this.mainCharacter = new MainCharacter(this.characterName, id)
-            const form = document.getElementById('landingForm')
+            const form = document.getElementById('startScreen')
             form.remove()
             document.querySelector('main').style.filter = 'blur(0px)'
             this.socket.send('enter-game', {
@@ -70,9 +70,10 @@ class Game {
         })
 
         document.getElementById('start').addEventListener('click', () => {
+            document.getElementsByTagName('main')[0].style.display = 'block';
             console.log("starting game")
             this.socket.send('ask-for-id', '')
-            const value = document.getElementById('landingForm').querySelector('input').value
+            const value = document.getElementById('startScreen').querySelector('input').value
             this.characterName = value == "" ? 'no_name' : value
         })
     }
