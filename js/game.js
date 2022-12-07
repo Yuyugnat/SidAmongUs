@@ -1,3 +1,7 @@
+import { GameMap } from "./gameMap.js";
+import { Character, MainCharacter, OtherCharacter } from "./Character.js";
+import { Socket } from "./socket.js";
+
 const pause = (ms) => new Promise(resolve => setTimeout(resolve, ms))
 
 class Game {

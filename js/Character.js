@@ -1,4 +1,4 @@
-class Character {
+export class Character {
 
     constructor(name, id) {
         this.name = name
@@ -37,7 +37,7 @@ class Character {
 
 }
 
-class MainCharacter extends Character {
+export class MainCharacter extends Character {
     constructor(name, id) {
         super(name, id)
         this.create()
@@ -97,7 +97,7 @@ class MainCharacter extends Character {
     }
 }
 
-class OtherCharacter extends Character {
+export class OtherCharacter extends Character {
     constructor(name, id) {
         super(name, id)
         this.create()

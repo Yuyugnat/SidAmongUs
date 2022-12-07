@@ -1,4 +1,6 @@
-class GameMap {
+import { Game } from './game.js'
+
+export class GameMap {
     // singleton
 
     static instance = null
