@@ -5,6 +5,12 @@
     linux/mac : `go run api/*.`
     windows : /
 
-## start ts compile watcher 
+## typscript
+
+### install
+
+    `npm i typescript -g 
+
+### start ts compile watcher
 
     `tsc --watch`
