@@ -4,6 +4,11 @@ import (
 	"github.com/gorilla/websocket"
 )
 
+type Event struct {
+	Type string `json:"type"`
+	Data string `json:"data"`
+}
+
 type Client struct {
 	conn      *websocket.Conn
 	player    *Player

@@ -24,7 +24,6 @@ class Game {
 	public directionY: number;
 	public newDirectionX: number;
 	public newDirectionY: number;
-	public characterName: string;
 	public listOtherPlayers: OtherCharacter[];
 	public map: GameMap | null;
 
@@ -42,7 +41,6 @@ class Game {
 		this.directionY = 0;
 		this.newDirectionX = 0;
 		this.newDirectionY = 0;
-		this.characterName = '';
 		this.listOtherPlayers = [];
 		this.map = null;
 	}
@@ -54,12 +52,17 @@ class Game {
 
 	setUpSocketListeners() {
 		this.socket.on('player-info', async (playerInfo: any) => {
-			const { id } = playerInfo;
-			const map = JSON.parse(playerInfo.map);
+			
+			const { id, name } = JSON.parse(playerInfo?.player);
+			if(id == undefined || name == undefined) return console.error('player info not found while parsing', playerInfo);
+
+			const { fragments, buildings } = JSON.parse(playerInfo?.map);
+			if(fragments == undefined || buildings == undefined) return console.error('map not found while parsing', playerInfo);
+
 			console.log('player info received', playerInfo);
 
-			this.map = GameMap.getInstance(map.fragments, map.buildings);
-			this.mainCharacter = new MainCharacter(this.characterName, id);
+			this.map = GameMap.getInstance(fragments, buildings);
+			this.mainCharacter = new MainCharacter(name, id);
 
 			const form = document.getElementById('startScreen');
 			if (!form) return console.error('form not found');
@@ -70,12 +73,6 @@ class Game {
 			if (!main) return console.error('main not found');
 
 			main.style.filter = 'blur(0px)';
-			await this.socket.send('enter-game', {
-				id: parseInt(id),
-				name: this.characterName,
-				x: this.mainCharacter.x,
-				y: this.mainCharacter.y
-			});
 
 			this.start();
 		});
@@ -93,15 +90,16 @@ class Game {
 			this.pressedKeys[e.code] = false;
 		});
 
-		document.getElementById('start')?.addEventListener('click', async () => {
+		document.getElementById('start')?.addEventListener('click', () => {
 			const main = document.getElementsByTagName('main')[0];
 			if (!main) return console.error('main not found');
 			main.style['display'] = 'block';
 			console.log('starting game');
-			await this.socket.send('ask-for-id', '');
+
 			const input = document.getElementById('startScreen')?.querySelector('input');
 			if (!input) return console.error('input not found');
-			this.characterName = input.value == '' ? 'no_name' : input.value;
+
+			this.socket.send('enter-game', { name: input.value == '' ? 'no_name' : input.value });		
 		});
 	}
 

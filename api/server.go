@@ -9,12 +9,7 @@ import (
 	"github.com/gorilla/websocket"
 )
 
-var NbPlayers = 0
-
 var h *Hub
-
-// declare PlayerList as a slice
-var PlayersList []Player = make([]Player, 0)
 
 var Gamemap = CreateMap("api/map.json")
 
@@ -48,33 +43,28 @@ func main() {
 
 		client := NewClient(conn)
 		h.clients[client] = true
+		game := GetGame()
 
 		isClose := false
 
 		conn.SetCloseHandler(func(code int, text string) error {
+			log.Println("Client disconnected")
 			delete(h.clients, client)
-			id := -1
-
-			for i, player := range PlayersList {
-				if player == *client.player {
-					id = i
-				}
-			}
 
 			client.broadcastToAll(&Event{
 				Type: "player-disconnected",
-				Data: fmt.Sprint(id),
+				Data: fmt.Sprint(client.player.ID),
 			})
 
-			PlayersList = append(PlayersList[:id], PlayersList[id+1:]...)
-			NbPlayers -= 1
+			game.removePlayer(client.player)
 			isClose = true
+			log.Println("new player list: ", game.players)
 			return nil
 		})
 
 		log.Println("Client connected")
 
-		jsonPlayersList, _ := json.Marshal(PlayersList)
+		jsonPlayersList, _ := json.Marshal(game.players)
 
 		client.broadcastEventToClient(&Event{
 			Type: "players-list",
