@@ -44,7 +44,7 @@ func (c *Client) broadcastToAll(event *Event) {
 }
 
 func BroadcastEventToAll(event *Event) {
-	for client, _ := range h.clients {
+	for client := range h.clients {
 		client.broadcastEventToClient(event)
 	}
 }
