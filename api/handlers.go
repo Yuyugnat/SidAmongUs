@@ -4,8 +4,6 @@ import (
 	"encoding/json"
 	"fmt"
 	"log"
-
-	"github.com/gorilla/websocket"
 )
 
 type Event struct {
@@ -19,15 +17,7 @@ type Move struct {
 	Y  int `json:"y"`
 }
 
-func BroadcastEvent(event *Event, conn *websocket.Conn) {
-	for c := range h.connections {
-		if c.ws != conn {
-			c.ws.WriteJSON(event)
-		}
-	}
-}
-
-func HandleTest(data string, _ *websocket.Conn) {
+func HandleTest(data string, _ *Client) {
 	log.Println("Handling test :", data)
 }
 
@@ -36,12 +26,12 @@ type AskIdData struct {
 	Map string `json:"map"`
 }
 
-func HandleAskForID(_ string, conn *websocket.Conn) {
+func HandleAskForID(_ string, client *Client) {
 	log.Println("Handling ask for id")
 	id := NbPlayers
 	NbPlayers += 1
 	// send the id to the client
-	conn.WriteJSON(Event{
+	client.broadcastEventToClient(&Event{
 		Type: "id",
 		Data: fmt.Sprint(id),
 	})
@@ -53,62 +43,54 @@ func HandleAskForID(_ string, conn *websocket.Conn) {
 		Map: string(jsonMap),
 	})
 
-	conn.WriteJSON(Event{
+	client.broadcastEventToClient(&Event{
 		Type: "player-info",
 		Data: string(dataMap),
 	})
 }
 
-func HandleMove(data string, conn *websocket.Conn) {
-	// log.Println("Handling move :", data)
+func HandleMove(data string, client *Client) {
 	move := &Move{}
 	json.Unmarshal([]byte(data), move)
-	BroadcastEvent(&Event{
+	client.broadcastToAll(&Event{
 		Type: "move",
 		Data: data,
-	}, conn)
-	// update the player position
-	for i, player := range PlayersList {
-		if player.Conn == conn {
-			PlayersList[i].X = move.X
-			PlayersList[i].Y = move.Y
-		}
-		log.Println(data)
-		log.Println("Player", i, ":", PlayersList[i])
-	}
+	})
+	client.player.X = move.X
+	client.player.Y = move.Y
 }
 
-func HandleEnterGame(data string, conn *websocket.Conn) {
-	playerData := &Player{}
-	json.Unmarshal([]byte(data), playerData)
-	playerData.Conn = conn
-	fmt.Println(playerData)
+func HandleEnterGame(data string, client *Client) {
+	client.player = &Player{}
+	json.Unmarshal([]byte(data), client.player)
 
-	PlayersList = append(PlayersList, *playerData)
+	fmt.Println(client.player)
+
+	PlayersList = append(PlayersList, *client.player)
 	log.Println("Handling enter game :", data)
 	log.Println("Players list :", PlayersList)
 
-	BroadcastEvent(&Event{
+	client.broadcastToAll(&Event{
 		Type: "new-player",
 		Data: data,
-	}, conn)
+	})
 }
 
-func HandlePlayerDisconnected(data string, conn *websocket.Conn) {
+func HandlePlayerDisconnected(data string, client *Client) {
 	log.Println("Handling player disconnected :", data)
-	BroadcastEvent(&Event{
+	client.broadcastToAll(&Event{
 		Type: "player-disconnected",
 		Data: data,
-	}, conn)
+	})
 	// remove the player from the player list
 	for i, player := range PlayersList {
-		if player.Conn == conn {
+		if player == *client.player {
 			PlayersList = append(PlayersList[:i], PlayersList[i+1:]...)
 		}
 	}
 	fmt.Println("playerlist:", PlayersList)
 }
-func HandlePlayerChat(data string, conn *websocket.Conn) {
+func HandlePlayerChat(data string, client *Client) {
 	log.Println("Handling player chat :", data)
 
 	messageData := &IncommingMessage{}
@@ -126,26 +108,25 @@ func HandlePlayerChat(data string, conn *websocket.Conn) {
 
 	log.Println(string(msgString))
 
-	conn.WriteJSON(Event{
+	client.broadcastEventToClient(&Event{
 		Type: "player-chat",
 		Data: string(msgString),
 	})
 
-	BroadcastEvent(&Event{
+	client.broadcastEventToClient(&Event{
 		Type: "player-chat",
 		Data: string(msgString),
-	}, conn)
+	})
 
 	log.Println("Broadcasting player chat :", string(msgString))
 }
 
-func setUpListeners() {
-	eventHandler := GetInstance()
+func setUpListeners(client *Client) {
 
-	eventHandler.on("ask-for-id", HandleAskForID)
-	eventHandler.on("test", HandleTest)
-	eventHandler.on("move", HandleMove)
-	eventHandler.on("enter-game", HandleEnterGame)
-	eventHandler.on("player-disconnected", HandlePlayerDisconnected)
-	eventHandler.on("chat-message", HandlePlayerChat)
+	client.on("ask-for-id", HandleAskForID)
+	client.on("test", HandleTest)
+	client.on("move", HandleMove)
+	client.on("enter-game", HandleEnterGame)
+	client.on("player-disconnected", HandlePlayerDisconnected)
+	client.on("chat-message", HandlePlayerChat)
 }

@@ -9,21 +9,9 @@ import (
 	"github.com/gorilla/websocket"
 )
 
-type connection struct {
-	// The websocket connection.
-	ws *websocket.Conn
-
-	// The hub.
-	h *hub
-}
-type hub struct {
-	// Registered connections. That's a connection pool
-	connections map[*connection]bool
-}
-
 var NbPlayers = 0
 
-var h = hub{}
+var h *Hub
 
 // declare PlayerList as a slice
 var PlayersList []Player = make([]Player, 0)
@@ -35,8 +23,8 @@ var Gamemap = CreateMap("api/map.json")
 func main() {
 
 	// create a new hub
-	h = hub{
-		connections: make(map[*connection]bool),
+	h = &Hub{
+		clients: make(map[*Client]bool),
 	}
 
 	fmt.Println(Gamemap)
@@ -50,27 +38,34 @@ func main() {
 	}
 
 	http.HandleFunc("/ws", func(w http.ResponseWriter, r *http.Request) {
+
+		log.Println("New connection")
 		conn, err := upgrader.Upgrade(w, r, nil)
 		if err != nil {
 			log.Println(err)
 			return
 		}
-		h.connections[&connection{ws: conn, h: &h}] = true
+
+		client := NewClient(conn)
+		h.clients[client] = true
 
 		isClose := false
 
 		conn.SetCloseHandler(func(code int, text string) error {
-			delete(h.connections, &connection{ws: conn, h: &h})
+			delete(h.clients, client)
 			id := -1
+
 			for i, player := range PlayersList {
-				if player.Conn == conn {
+				if player == *client.player {
 					id = i
 				}
 			}
-			BroadcastEvent(&Event{
+
+			client.broadcastToAll(&Event{
 				Type: "player-disconnected",
 				Data: fmt.Sprint(id),
-			}, conn)
+			})
+
 			PlayersList = append(PlayersList[:id], PlayersList[id+1:]...)
 			NbPlayers -= 1
 			isClose = true
@@ -81,12 +76,12 @@ func main() {
 
 		jsonPlayersList, _ := json.Marshal(PlayersList)
 
-		conn.WriteJSON(Event{
+		client.broadcastEventToClient(&Event{
 			Type: "players-list",
 			Data: string(jsonPlayersList),
 		})
 
-		setUpListeners()
+		setUpListeners(client)
 
 		for !isClose {
 			// Read message from browser
@@ -98,9 +93,9 @@ func main() {
 			}
 
 			if event.Type != "move" {
-				log.Println("Event received :", event)
+				log.Printf("Event %s received from %s ", event, client.conn.RemoteAddr().String())
 			}
-			GetInstance().onClientEvent(*event, conn)
+			client.onClientEvent(*event)
 		}
 		fmt.Println("Client disconnected")
 		conn.Close()
