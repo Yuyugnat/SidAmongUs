@@ -75,6 +75,10 @@ class Game {
         });
         (_a = document.getElementById('start')) === null || _a === void 0 ? void 0 : _a.addEventListener('click', () => __awaiter(this, void 0, void 0, function* () {
             var _b;
+            const main = document.getElementsByTagName('main')[0];
+            if (!main)
+                return console.error('main not found');
+            main.style['display'] = 'block';
             console.log('starting game');
             yield this.socket.send('ask-for-id', '');
             const input = (_b = document.getElementById('startScreen')) === null || _b === void 0 ? void 0 : _b.querySelector('input');

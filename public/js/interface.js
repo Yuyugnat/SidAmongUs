@@ -2,6 +2,7 @@ export const addPlayerOnDisplay = (player) => {
     const list = document.getElementById('playerListDisplay');
     if (!list)
         return console.error('playerListDisplay not found');
+    console.log("new player on display");
     const playerDisplay = document.createElement('div');
     playerDisplay.id = 'player-display-' + player.id;
     playerDisplay.classList.add('flex--row');

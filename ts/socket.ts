@@ -14,7 +14,7 @@ class Socket {
 		this.functions = new Map();
 		this.ws.onmessage = event => {
 			const { type, data } = JSON.parse(event.data);
-			console.log('message receivedzizi', type, JSON.parse(data));
+			console.log('message received', type, JSON.parse(data));
 			this.functions.get(type)?.(JSON.parse(data));
 		};
 	}
@@ -26,8 +26,8 @@ class Socket {
 	async send(type: string, data: any) {
 		while (this.ws.readyState === 0) {
 			await pause(2000);
-		}
-		console.log('message sent', type, data);
+		} 
+		if(type != 'move') console.log('message sent', type, data);
 		this.ws.send(JSON.stringify({ type: type, data: JSON.stringify(data) }));
 	}
 

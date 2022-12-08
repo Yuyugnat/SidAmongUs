@@ -18,7 +18,7 @@ class Socket {
         this.ws.onmessage = event => {
             var _a;
             const { type, data } = JSON.parse(event.data);
-            console.log('message receivedzizi', type, JSON.parse(data));
+            console.log('message received', type, JSON.parse(data));
             (_a = this.functions.get(type)) === null || _a === void 0 ? void 0 : _a(JSON.parse(data));
         };
     }
@@ -30,7 +30,8 @@ class Socket {
             while (this.ws.readyState === 0) {
                 yield pause(2000);
             }
-            console.log('message sent', type, data);
+            if (type != 'move')
+                console.log('message sent', type, data);
             this.ws.send(JSON.stringify({ type: type, data: JSON.stringify(data) }));
         });
     }

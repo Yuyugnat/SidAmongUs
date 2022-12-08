@@ -17,7 +17,7 @@ class EventHandlers {
         socket.on('players-list', (playersList) => {
             console.log('players-list', playersList);
             playersList.forEach(player => {
-                if (!player.id)
+                if (!player.id == undefined)
                     return;
                 const tmp = new OtherCharacter(player.name, player.id);
                 addPlayerOnDisplay(tmp);

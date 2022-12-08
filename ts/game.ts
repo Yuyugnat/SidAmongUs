@@ -61,7 +61,7 @@ class Game {
 			this.map = GameMap.getInstance(map.fragments, map.buildings);
 			this.mainCharacter = new MainCharacter(this.characterName, id);
 
-            const form = document.getElementById('startScreen')
+			const form = document.getElementById('startScreen');
 			if (!form) return console.error('form not found');
 
 			form.remove();
@@ -84,11 +84,9 @@ class Game {
 	}
 
 	setUpWindowListeners() {
-
-
 		window.addEventListener('keydown', e => {
-            if(e.code == 'Enter') return Chat.handlePressEnter();
-            if(!Chat.isChatOpened) this.pressedKeys[e.code] = true;
+			if (e.code == 'Enter') return Chat.handlePressEnter();
+			if (!Chat.isChatOpened) this.pressedKeys[e.code] = true;
 		});
 
 		window.addEventListener('keyup', e => {
@@ -96,6 +94,9 @@ class Game {
 		});
 
 		document.getElementById('start')?.addEventListener('click', async () => {
+			const main = document.getElementsByTagName('main')[0];
+			if (!main) return console.error('main not found');
+			main.style['display'] = 'block';
 			console.log('starting game');
 			await this.socket.send('ask-for-id', '');
 			const input = document.getElementById('startScreen')?.querySelector('input');
