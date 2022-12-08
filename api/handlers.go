@@ -25,25 +25,28 @@ type EnterGameData struct {
 	Map    string `json:"map"`
 }
 
-func HandleEnterGame(_ string, client *Client) {
+func HandleEnterGame(data string, client *Client) {
 	log.Println("Handling entering game")
+
+	received := &PlayerInfo{}
+	json.Unmarshal([]byte(data), received)
 
 	jsonMap, _ := json.Marshal(Gamemap)
 
-	player := GetGame().newPlayer(client, "", 0, 0)
+	player := GetGame().newPlayer(client, received.Name, 0, 0)
 	playerData, _ := json.Marshal(&PlayerInfo{
 		ID:   player.ID,
 		Name: player.Name,
 	})
 
-	data, _ := json.Marshal(EnterGameData{
+	res, _ := json.Marshal(EnterGameData{
 		Player: string(playerData),
 		Map:    string(jsonMap),
 	})
 
 	client.broadcastEventToClient(&Event{
 		Type: "player-info",
-		Data: string(data),
+		Data: string(res),
 	})
 
 	client.broadcastToAll(&Event{
