@@ -36,7 +36,7 @@ func (c *Client) onClientEvent(ev Event) {
 }
 
 func (c *Client) broadcastToAll(event *Event) {
-	for client, _ := range h.clients {
+	for client := range h.clients {
 		if client != c {
 			client.broadcastEventToClient(event)
 		}
