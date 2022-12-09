@@ -1,8 +1,12 @@
-package main
+package handlers
 
 import (
 	"encoding/json"
 	"log"
+	"server-sidamongus/api/game"
+	"server-sidamongus/api/models/events"
+	"server-sidamongus/api/models/requests"
+	"server-sidamongus/api/socket"
 )
 
 type Move struct {
@@ -11,7 +15,7 @@ type Move struct {
 	Y  int `json:"y"`
 }
 
-func HandleTest(data string, _ *Client) {
+func HandleTest(data string, _ *socket.Client) {
 	log.Println("Handling test :", data)
 }
 
@@ -25,15 +29,15 @@ type EnterGameData struct {
 	Map    string `json:"map"`
 }
 
-func HandleEnterGame(data string, client *Client) {
+func HandleEnterGame(data string, client *socket.Client) {
 	log.Println("Handling entering game")
 
 	received := &PlayerInfo{}
 	json.Unmarshal([]byte(data), received)
 
-	jsonMap, _ := json.Marshal(GetGame().gameMap)
+	jsonMap, _ := json.Marshal(game.GetGame().GameMap)
 
-	player := GetGame().newPlayer(client, received.Name, 0, 0)
+	player := client.CreatePlayer(received.Name)
 	playerData, _ := json.Marshal(&PlayerInfo{
 		ID:   player.ID,
 		Name: player.Name,
@@ -44,34 +48,34 @@ func HandleEnterGame(data string, client *Client) {
 		Map:    string(jsonMap),
 	})
 
-	client.broadcastEventToClient(&Event{
-		Type: "player-info",
+	client.BroadcastEventToClient(&socket.EventEmit{
+		Type: events.PLAYER_INFO,
 		Data: string(res),
 	})
 
 	log.Println(client)
 
-	client.broadcastToAll(&Event{
-		Type: "new-player",
+	client.BroadcastToAll(&socket.EventEmit{
+		Type: events.NEW_PLAYER,
 		Data: string(playerData),
 	})
 
 }
 
-func HandleMove(data string, client *Client) {
+func HandleMove(data string, client *socket.Client) {
 	move := &Move{}
 	json.Unmarshal([]byte(data), move)
-	client.broadcastToAll(&Event{
-		Type: "move",
+	client.BroadcastToAll(&socket.EventEmit{
+		Type: events.MOVE_SERVER,
 		Data: data,
 	})
-	client.player.X = move.X
-	client.player.Y = move.Y
+	client.Player.X = move.X
+	client.Player.Y = move.Y
 }
 
 //	func HandlePlayerDisconnected(data string, client *Client) {
 //		log.Println("Handling player disconnected :", data)
-//		client.broadcastToAll(&Event{
+//		client.BroadcastToAll(&Event{
 //			Type: "player-disconnected",
 //			Data: data,
 //		})
@@ -84,16 +88,16 @@ func HandleMove(data string, client *Client) {
 //		fmt.Println("playerlist:", PlayersList)
 //	}
 
-func HandlePlayerChat(data string, client *Client) {
+func HandlePlayerChat(data string, client *socket.Client) {
 	log.Println("Handling player chat :", data)
 
-	messageData := &IncommingMessage{}
+	messageData := &requests.IncommingMessage{}
 	json.Unmarshal([]byte(data), messageData)
 
-	broadcastMessageData := &BroadcastMessage{
+	broadcastMessageData := &requests.BroadcastMessage{
 		ID:      messageData.ID,
-		X:       client.player.X,
-		Y:       client.player.Y,
+		X:       client.Player.X,
+		Y:       client.Player.Y,
 		Message: messageData.Message,
 	}
 
@@ -101,24 +105,19 @@ func HandlePlayerChat(data string, client *Client) {
 
 	log.Println(string(msgString))
 
-	client.broadcastEventToClient(&Event{
-		Type: "player-chat",
+	socket.BroadcastEventToAll(&socket.EventEmit{
+		Type: events.PLAYER_CHAT,
 		Data: string(msgString),
-	})
-
-	client.broadcastEventToClient(&Event{
-		Type: "player-chat",
-		Data: string(msgString),
-	})
+	}, client.Hub)
 
 	log.Println("Broadcasting player chat :", string(msgString))
 }
 
-func setUpListeners(client *Client) {
+func SetUpHandlers(client *socket.Client) {
 
-	client.on("test", HandleTest)
-	client.on("move", HandleMove)
-	client.on("enter-game", HandleEnterGame)
-	// client.on("player-disconnected", HandlePlayerDisconnected)
-	client.on("chat-message", HandlePlayerChat)
+	// client.On("test", HandleTest)
+	client.On(events.MOVE_CLIENT, HandleMove)
+	client.On(events.ENTER_GAME, HandleEnterGame)
+	// client.On("player-disconnected", HandlePlayerDisconnected)
+	client.On(events.CHAT_MESSAGE, HandlePlayerChat)
 }

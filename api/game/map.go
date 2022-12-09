@@ -1,10 +1,15 @@
-package main
+package game
 
 import (
 	"encoding/json"
 	"fmt"
 	"io"
 	"os"
+)
+
+const (
+	DEFAULT_X = 2100
+	DEFAULT_Y = 2500
 )
 
 type MapFragment struct {

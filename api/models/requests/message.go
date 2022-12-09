@@ -1,4 +1,4 @@
-package main
+package requests
 
 type BroadcastMessage struct {
 	ID      int    `json:"id"`

@@ -5,11 +5,15 @@ import (
 	"fmt"
 	"log"
 	"net/http"
+	"server-sidamongus/api/game"
+	"server-sidamongus/api/handlers"
+	"server-sidamongus/api/models/events"
+	"server-sidamongus/api/socket"
 
 	"github.com/gorilla/websocket"
 )
 
-var h *Hub
+var h *socket.Hub
 
 // var Gamemap = CreateMap("api/map.json")
 
@@ -18,12 +22,12 @@ var h *Hub
 func main() {
 
 	// create a new hub
-	h = &Hub{
-		clients: make(map[*Client]bool),
+	h = &socket.Hub{
+		Clients: make(map[*socket.Client]bool),
 	}
 
-	game := GetGame()
-	fmt.Println(game.gameMap)
+	game := game.GetGame()
+	fmt.Println(game.GameMap)
 
 	upgrader := websocket.Upgrader{
 		ReadBufferSize:  1024,
@@ -42,40 +46,39 @@ func main() {
 			return
 		}
 
-		client := NewClient(conn)
-		h.clients[client] = true
+		client := socket.NewClient(conn, h)
 
 		isClose := false
 
 		conn.SetCloseHandler(func(code int, text string) error {
 			log.Println("Client disconnected")
-			delete(h.clients, client)
+			delete(h.Clients, client)
 
-			client.broadcastToAll(&Event{
-				Type: "player-disconnected",
-				Data: fmt.Sprint(client.player.ID),
+			client.BroadcastToAll(&socket.EventEmit{
+				Type: events.PLAYER_DISCONNECTED,
+				Data: fmt.Sprint(client.Player.ID),
 			})
 
-			game.removePlayer(client.player)
+			game.RemovePlayer(client.Player)
 			isClose = true
-			log.Println("new player list: ", game.players)
+			log.Println("new player list: ", game.Players)
 			return nil
 		})
 
 		log.Printf("Client connected : %s", conn.RemoteAddr().String())
 
-		jsonPlayersList, _ := json.Marshal(game.players)
+		jsonPlayersList, _ := json.Marshal(game.Players)
 
-		client.broadcastEventToClient(&Event{
-			Type: "players-list",
+		client.BroadcastEventToClient(&socket.EventEmit{
+			Type: events.PLAYER_LIST,
 			Data: string(jsonPlayersList),
 		})
 
-		setUpListeners(client)
+		handlers.SetUpHandlers(client)
 
 		for !isClose {
 			// Read message from browser
-			event := &Event{}
+			event := &socket.EventReceived{}
 			err := conn.ReadJSON(&event)
 
 			if err != nil {
@@ -83,9 +86,9 @@ func main() {
 			}
 
 			if event.Type != "move" {
-				log.Printf("Event %s received from %s ", event, client.conn.RemoteAddr().String())
+				log.Printf("Event %s received from %s ", event, client.Conn.RemoteAddr().String())
 			}
-			client.onClientEvent(*event)
+			client.OnClientEvent(*event)
 		}
 		fmt.Println("Client disconnected")
 		conn.Close()

@@ -1,6 +1,6 @@
-package main
+package socket
 
 type Hub struct {
 	// Registered connections. That's a connection pool
-	clients map[*Client]bool
+	Clients map[*Client]bool
 }
