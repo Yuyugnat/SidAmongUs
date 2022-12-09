@@ -11,7 +11,7 @@ import (
 
 var h *Hub
 
-var Gamemap = CreateMap("api/map.json")
+// var Gamemap = CreateMap("api/map.json")
 
 // Message is a struct
 
@@ -22,7 +22,8 @@ func main() {
 		clients: make(map[*Client]bool),
 	}
 
-	fmt.Println(Gamemap)
+	game := GetGame()
+	fmt.Println(game.gameMap)
 
 	upgrader := websocket.Upgrader{
 		ReadBufferSize:  1024,
@@ -43,7 +44,6 @@ func main() {
 
 		client := NewClient(conn)
 		h.clients[client] = true
-		game := GetGame()
 
 		isClose := false
 
@@ -62,7 +62,7 @@ func main() {
 			return nil
 		})
 
-		log.Println("Client connected")
+		log.Printf("Client connected : %s", conn.RemoteAddr().String())
 
 		jsonPlayersList, _ := json.Marshal(game.players)
 

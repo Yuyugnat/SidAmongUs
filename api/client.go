@@ -1,6 +1,8 @@
 package main
 
 import (
+	"log"
+
 	"github.com/gorilla/websocket"
 )
 
@@ -21,6 +23,7 @@ func NewClient(conn *websocket.Conn) *Client {
 		conn:      conn,
 		player:    nil,
 		functions: map[string]func(data string, c *Client){},
+		hub:       h,
 	}
 }
 
@@ -41,6 +44,8 @@ func (c *Client) onClientEvent(ev Event) {
 }
 
 func (c *Client) broadcastToAll(event *Event) {
+	log.Println("zizi")
+	log.Println(h)
 	for client := range h.clients {
 		if client != c {
 			client.broadcastEventToClient(event)

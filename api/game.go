@@ -11,12 +11,14 @@ var (
 
 type Game struct {
 	players []*Player
+	gameMap *Map
 }
 
 func GetGame() *Game {
 	once.Do(func() {
 		instance = &Game{
 			players: []*Player{},
+			gameMap: CreateMap("api/map.json"),
 		}
 	})
 	return instance

@@ -16,12 +16,12 @@ type MapFragment struct {
 }
 
 type Building struct {
-	Id    int    `json:"id"`
-	X    int    `json:"x"`
-	Y    int    `json:"y"`
+	Id     int    `json:"id"`
+	X      int    `json:"x"`
+	Y      int    `json:"y"`
 	Width  int    `json:"width"`
 	Height int    `json:"height"`
-	Link  string `json:"link"`
+	Link   string `json:"link"`
 }
 
 type Map struct {
@@ -29,8 +29,8 @@ type Map struct {
 	Buildings []Building    `json:"buildings"`
 }
 
-func CreateMap(path string) Map {
-	m := Map{
+func CreateMap(path string) *Map {
+	m := &Map{
 		Fragments: make([]MapFragment, 0),
 		Buildings: make([]Building, 0),
 	}

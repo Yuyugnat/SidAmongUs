@@ -31,7 +31,7 @@ func HandleEnterGame(data string, client *Client) {
 	received := &PlayerInfo{}
 	json.Unmarshal([]byte(data), received)
 
-	jsonMap, _ := json.Marshal(Gamemap)
+	jsonMap, _ := json.Marshal(GetGame().gameMap)
 
 	player := GetGame().newPlayer(client, received.Name, 0, 0)
 	playerData, _ := json.Marshal(&PlayerInfo{
@@ -48,6 +48,8 @@ func HandleEnterGame(data string, client *Client) {
 		Type: "player-info",
 		Data: string(res),
 	})
+
+	log.Println(client)
 
 	client.broadcastToAll(&Event{
 		Type: "new-player",
