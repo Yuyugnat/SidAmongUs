@@ -11,7 +11,6 @@ class EventHandlers {
 		socket.on(ServerToClientEvents.PLAYER_LIST, (playersList: any[]) => {
 			console.log('players-list', playersList);
 			playersList.forEach(player => {
-				console.log("zizi");
 				
 				const tmp = new OtherCharacter(player.name, player.id)
 				addPlayerOnDisplay(tmp);
@@ -35,7 +34,6 @@ class EventHandlers {
 		});
 
 		socket.on(ServerToClientEvents.PLAYER_DISCONNECTED, id => {
-			console.log("zizi",id);
 			
 			document.getElementById('player-display-' + id)?.remove();
 			game.listOtherPlayers.forEach(player => {

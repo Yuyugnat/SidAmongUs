@@ -6,44 +6,29 @@ import (
 	"server-sidamongus/api/game"
 	"server-sidamongus/api/models/events"
 	"server-sidamongus/api/models/requests"
+	"server-sidamongus/api/models/responses"
 	"server-sidamongus/api/socket"
 )
-
-type Move struct {
-	ID int `json:"id"`
-	X  int `json:"x"`
-	Y  int `json:"y"`
-}
-
-func HandleTest(data string, _ *socket.Client) {
-	log.Println("Handling test :", data)
-}
-
-type PlayerInfo struct {
-	ID   int    `json:"id"`
-	Name string `json:"name"`
-}
-
-type EnterGameData struct {
-	Player string `json:"player"`
-	Map    string `json:"map"`
-}
 
 func HandleEnterGame(data string, client *socket.Client) {
 	log.Println("Handling entering game")
 
-	received := &PlayerInfo{}
+	received := &responses.PlayerInfo{}
 	json.Unmarshal([]byte(data), received)
 
-	jsonMap, _ := json.Marshal(game.GetGame().GameMap)
+	jsonMap, err := json.Marshal(game.GetGame().GameMap)
+
+	if err != nil {
+		log.Println(err)
+	}
 
 	player := client.CreatePlayer(received.Name)
-	playerData, _ := json.Marshal(&PlayerInfo{
+	playerData, _ := json.Marshal(&responses.PlayerInfo{
 		ID:   player.ID,
 		Name: player.Name,
 	})
 
-	res, _ := json.Marshal(EnterGameData{
+	res, _ := json.Marshal(responses.EnterGameData{
 		Player: string(playerData),
 		Map:    string(jsonMap),
 	})
@@ -59,11 +44,10 @@ func HandleEnterGame(data string, client *socket.Client) {
 		Type: events.NEW_PLAYER,
 		Data: string(playerData),
 	})
-
 }
 
 func HandleMove(data string, client *socket.Client) {
-	move := &Move{}
+	move := &responses.Move{}
 	json.Unmarshal([]byte(data), move)
 	client.BroadcastToAll(&socket.EventEmit{
 		Type: events.MOVE_SERVER,
@@ -72,21 +56,6 @@ func HandleMove(data string, client *socket.Client) {
 	client.Player.X = move.X
 	client.Player.Y = move.Y
 }
-
-//	func HandlePlayerDisconnected(data string, client *Client) {
-//		log.Println("Handling player disconnected :", data)
-//		client.BroadcastToAll(&Event{
-//			Type: "player-disconnected",
-//			Data: data,
-//		})
-//		// remove the player from the player list
-//		for i, player := range PlayersList {
-//			if player == *client.player {
-//				PlayersList = append(PlayersList[:i], PlayersList[i+1:]...)
-//			}
-//		}
-//		fmt.Println("playerlist:", PlayersList)
-//	}
 
 func HandlePlayerChat(data string, client *socket.Client) {
 	log.Println("Handling player chat :", data)

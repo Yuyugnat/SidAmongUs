@@ -53,7 +53,6 @@ func (c *Client) OnClientEvent(ev EventReceived) {
 }
 
 func (c *Client) BroadcastToAll(event *EventEmit) {
-	log.Println("zizi")
 	log.Println(c.Hub)
 	for client := range c.Hub.Clients {
 		if client != c {

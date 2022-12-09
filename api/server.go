@@ -88,7 +88,7 @@ func main() {
 			if event.Type != "move" {
 				log.Printf("Event %s received from %s ", event, client.Conn.RemoteAddr().String())
 			}
-			client.OnClientEvent(*event)
+			go client.OnClientEvent(*event)
 		}
 		fmt.Println("Client disconnected")
 		conn.Close()
