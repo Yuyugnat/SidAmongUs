@@ -2,16 +2,8 @@ package main
 
 import (
 	"encoding/json"
-	"fmt"
 	"log"
-
-	"github.com/gorilla/websocket"
 )
-
-type Event struct {
-	Type string `json:"type"`
-	Data string `json:"data"`
-}
 
 type Move struct {
 	ID int `json:"id"`
@@ -19,106 +11,89 @@ type Move struct {
 	Y  int `json:"y"`
 }
 
-func BroadcastEvent(event *Event, conn *websocket.Conn) {
-	for c := range h.connections {
-		if c.ws != conn {
-			c.ws.WriteJSON(event)
-		}
-	}
-}
-
-func HandleTest(data string, _ *websocket.Conn) {
+func HandleTest(data string, _ *Client) {
 	log.Println("Handling test :", data)
 }
 
-type AskIdData struct {
-	Id  int    `json:"id"`
-	Map string `json:"map"`
+type PlayerInfo struct {
+	ID   int    `json:"id"`
+	Name string `json:"name"`
 }
 
-func HandleAskForID(_ string, conn *websocket.Conn) {
-	log.Println("Handling ask for id")
-	id := NbPlayers
-	NbPlayers += 1
-	// send the id to the client
-	conn.WriteJSON(Event{
-		Type: "id",
-		Data: fmt.Sprint(id),
+type EnterGameData struct {
+	Player string `json:"player"`
+	Map    string `json:"map"`
+}
+
+func HandleEnterGame(data string, client *Client) {
+	log.Println("Handling entering game")
+
+	received := &PlayerInfo{}
+	json.Unmarshal([]byte(data), received)
+
+	jsonMap, _ := json.Marshal(GetGame().gameMap)
+
+	player := GetGame().newPlayer(client, received.Name, 0, 0)
+	playerData, _ := json.Marshal(&PlayerInfo{
+		ID:   player.ID,
+		Name: player.Name,
 	})
 
-	jsonMap, _ := json.Marshal(Gamemap)
-
-	dataMap, _ := json.Marshal(AskIdData{
-		Id:  id,
-		Map: string(jsonMap),
+	res, _ := json.Marshal(EnterGameData{
+		Player: string(playerData),
+		Map:    string(jsonMap),
 	})
 
-	conn.WriteJSON(Event{
+	client.broadcastEventToClient(&Event{
 		Type: "player-info",
-		Data: string(dataMap),
+		Data: string(res),
 	})
+
+	log.Println(client)
+
+	client.broadcastToAll(&Event{
+		Type: "new-player",
+		Data: string(playerData),
+	})
+
 }
 
-func HandleMove(data string, conn *websocket.Conn) {
-	// log.Println("Handling move :", data)
+func HandleMove(data string, client *Client) {
 	move := &Move{}
 	json.Unmarshal([]byte(data), move)
-	BroadcastEvent(&Event{
+	client.broadcastToAll(&Event{
 		Type: "move",
 		Data: data,
-	}, conn)
-	// update the player position
-	for i, player := range PlayersList {
-		if player.Conn == conn {
-			PlayersList[i].X = move.X
-			PlayersList[i].Y = move.Y
-		}
-		log.Println(data)
-		log.Println("Player", i, ":", PlayersList[i])
-	}
+	})
+	client.player.X = move.X
+	client.player.Y = move.Y
 }
 
-func HandleEnterGame(data string, conn *websocket.Conn) {
-	playerData := &Player{}
-	json.Unmarshal([]byte(data), playerData)
-	playerData.Conn = conn
-	fmt.Println(playerData)
+//	func HandlePlayerDisconnected(data string, client *Client) {
+//		log.Println("Handling player disconnected :", data)
+//		client.broadcastToAll(&Event{
+//			Type: "player-disconnected",
+//			Data: data,
+//		})
+//		// remove the player from the player list
+//		for i, player := range PlayersList {
+//			if player == *client.player {
+//				PlayersList = append(PlayersList[:i], PlayersList[i+1:]...)
+//			}
+//		}
+//		fmt.Println("playerlist:", PlayersList)
+//	}
 
-	PlayersList = append(PlayersList, *playerData)
-	log.Println("Handling enter game :", data)
-	log.Println("Players list :", PlayersList)
-
-	BroadcastEvent(&Event{
-		Type: "new-player",
-		Data: data,
-	}, conn)
-}
-
-func HandlePlayerDisconnected(data string, conn *websocket.Conn) {
-	log.Println("Handling player disconnected :", data)
-	BroadcastEvent(&Event{
-		Type: "player-disconnected",
-		Data: data,
-	}, conn)
-	// remove the player from the player list
-	for i, player := range PlayersList {
-		if player.Conn == conn {
-			PlayersList = append(PlayersList[:i], PlayersList[i+1:]...)
-		}
-	}
-	fmt.Println("playerlist:", PlayersList)
-}
-func HandlePlayerChat(data string, conn *websocket.Conn) {
+func HandlePlayerChat(data string, client *Client) {
 	log.Println("Handling player chat :", data)
 
 	messageData := &IncommingMessage{}
 	json.Unmarshal([]byte(data), messageData)
-	player := PlayersList[messageData.ID]
 
 	broadcastMessageData := &BroadcastMessage{
 		ID:      messageData.ID,
-		X:       player.X,
-		Y:       player.Y,
+		X:       client.player.X,
+		Y:       client.player.Y,
 		Message: messageData.Message,
 	}
 
@@ -126,26 +101,24 @@ func HandlePlayerChat(data string, conn *websocket.Conn) {
 
 	log.Println(string(msgString))
 
-	conn.WriteJSON(Event{
+	client.broadcastEventToClient(&Event{
 		Type: "player-chat",
 		Data: string(msgString),
 	})
 
-	BroadcastEvent(&Event{
+	client.broadcastEventToClient(&Event{
 		Type: "player-chat",
 		Data: string(msgString),
-	}, conn)
+	})
 
 	log.Println("Broadcasting player chat :", string(msgString))
 }
 
-func setUpListeners() {
-	eventHandler := GetInstance()
+func setUpListeners(client *Client) {
 
-	eventHandler.on("ask-for-id", HandleAskForID)
-	eventHandler.on("test", HandleTest)
-	eventHandler.on("move", HandleMove)
-	eventHandler.on("enter-game", HandleEnterGame)
-	eventHandler.on("player-disconnected", HandlePlayerDisconnected)
-	eventHandler.on("chat-message", HandlePlayerChat)
+	client.on("test", HandleTest)
+	client.on("move", HandleMove)
+	client.on("enter-game", HandleEnterGame)
+	// client.on("player-disconnected", HandlePlayerDisconnected)
+	client.on("chat-message", HandlePlayerChat)
 }
