@@ -1,5 +1,13 @@
-const addPlayerOnDisplay = (player) => {
+import { Character } from "./character";
+
+export const addPlayerOnDisplay = (player: Character) => {
     const list = document.getElementById('playerListDisplay')
+
+    if(!list) return console.error('playerListDisplay not found');
+
+    console.log("new player on display");
+    
+
     const playerDisplay = document.createElement('div');
     playerDisplay.id = 'player-display-' + player.id;
     playerDisplay.classList.add('flex--row');
@@ -19,7 +27,7 @@ const addPlayerOnDisplay = (player) => {
     list.appendChild(playerDisplay);
 }
 
-removePlayerFromDisplay = (player) => {
+export const removePlayerFromDisplay = (player: Character) => {
     const dom = document.getElementById('player-display-' + player.id);
-    dom.remove();
+    dom?.remove();
 }
