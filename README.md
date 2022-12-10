@@ -9,7 +9,7 @@
 
 ### install
 
-    `npm i typescript -g 
+    `npm i typescript -g`
 
 ### start ts compile watcher
 
