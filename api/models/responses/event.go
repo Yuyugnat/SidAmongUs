@@ -7,6 +7,13 @@ type Event struct {
 	Data string                     `json:"data"`
 }
 
+type BroadcastMessage struct {
+	ID      int    `json:"id"`
+	Message string `json:"message"`
+	X       int    `json:"x"`
+	Y       int    `json:"y"`
+}
+
 type Move struct {
 	ID int `json:"id"`
 	X  int `json:"x"`

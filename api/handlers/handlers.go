@@ -63,7 +63,7 @@ func HandlePlayerChat(data string, client *socket.Client) {
 	messageData := &requests.IncommingMessage{}
 	json.Unmarshal([]byte(data), messageData)
 
-	broadcastMessageData := &requests.BroadcastMessage{
+	broadcastMessageData := &responses.BroadcastMessage{
 		ID:      messageData.ID,
 		X:       client.Player.X,
 		Y:       client.Player.Y,
