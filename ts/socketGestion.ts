@@ -1,40 +1,31 @@
 import { Game } from './game.js';
 import { OtherCharacter } from './character.js';
 import { addPlayerOnDisplay } from './interface.js';
+import { ClienToServerEvents, ServerToClientEvents} from './events.js';
 
 class EventHandlers {
 	static setup() {
 		const game = Game.getInstance();
 		const socket = game.socket;
-		socket.on('player-disconnected', id => {
-			console.log(game.listOtherPlayers);
-			game.listOtherPlayers.forEach(player => {
-				if (player.id == id) {
-					console.log(player);
-					player.element.remove();
-				}
-			});
-		});
 
-		socket.on('players-list', (playersList: any[]) => {
+		socket.on(ServerToClientEvents.PLAYER_LIST, (playersList: any[]) => {
 			console.log('players-list', playersList);
 			playersList.forEach(player => {
-				if (!player.id == undefined) return;
+				
 				const tmp = new OtherCharacter(player.name, player.id)
 				addPlayerOnDisplay(tmp);
 				game.listOtherPlayers.push(tmp);
 			});
 		});
 
-		socket.on('new-player', ({ name, id }) => {
+		socket.on(ServerToClientEvents.NEW_PLAYER, ({ name, id }) => {
 			console.log('un nouveau joueur');
-			if (!id) return;
 			const tmp = new OtherCharacter(name, id)
 			addPlayerOnDisplay(tmp);
 			game.listOtherPlayers.push(tmp)
 		});
 
-		socket.on('move', ({ id, x, y }) => {
+		socket.on(ServerToClientEvents.MOVE, ({ id, x, y }) => {
 			game.listOtherPlayers.forEach(player => {
 				if (player.id == id) {
 					player.update(x, y);
@@ -42,7 +33,7 @@ class EventHandlers {
 			});
 		});
 
-		socket.on('player-disconnected', id => {
+		socket.on(ServerToClientEvents.PLAYER_DISCONNECTED, id => {
 			
 			document.getElementById('player-display-' + id)?.remove();
 			game.listOtherPlayers.forEach(player => {
@@ -53,7 +44,7 @@ class EventHandlers {
 			});
 		});
 
-		socket.on('player-chat', ({ id, message }) => {
+		socket.on(ServerToClientEvents.PLAYER_CHAT, ({ id, message }) => {
 			if (!game.mainCharacter) return;
 
 			const dom = document.createElement('div');

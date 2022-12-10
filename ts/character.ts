@@ -1,3 +1,4 @@
+import { ClienToServerEvents } from './events.js';
 import { Game } from './game.js';
 
 class Character {
@@ -128,7 +129,7 @@ class MainCharacter extends Character {
 		if (!main) return console.error('main not found');
 		main.style.transform = `translate(${-xTranslation}px, ${-yTranslation}px)`;
 		if (this.directionX !== 0 || this.directionY !== 0)
-			Game.getInstance().socket.send('move', {
+			Game.getInstance().socket.send(ClienToServerEvents.MOVE, {
 				id: this.id,
 				x: this.x,
 				y: this.y

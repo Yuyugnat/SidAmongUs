@@ -1,3 +1,4 @@
+import { ClienToServerEvents } from './events.js';
 import { Game } from './game.js';
 
 class Chat {
@@ -12,7 +13,7 @@ class Chat {
 			Chat.input.style.display = 'none';
 			const message = Chat.message.value;
 			Chat.message.value = '';
-			Game.getInstance()?.socket.send('chat-message', {
+			Game.getInstance().socket.send(ClienToServerEvents.CHAT_MESSAGE, {
 				id: parseInt(Game.getInstance().mainCharacter?.id + ''),
 				message
 			});

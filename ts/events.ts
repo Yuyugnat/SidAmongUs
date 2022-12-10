@@ -1,0 +1,14 @@
+export enum ClienToServerEvents {
+	ENTER_GAME = 'ENTER_GAME',
+	MOVE = 'MOVE',
+	CHAT_MESSAGE = 'CHAT_MESSAGE',
+}
+
+export enum ServerToClientEvents {
+	NEW_PLAYER = 'NEW_PLAYER',
+	PLAYER_DISCONNECTED = 'PLAYER_DISCONNECTED',
+	PLAYER_LIST = 'PLAYER_LIST',
+	PLAYER_CHAT = 'PLAYER_CHAT',
+    PLAYER_INFO = 'PLAYER_INFO',
+    MOVE = 'MOVE',
+}

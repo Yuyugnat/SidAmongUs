@@ -3,6 +3,7 @@ import { Character, MainCharacter, OtherCharacter } from './character.js';
 import { Socket } from './socket.js';
 import { EventHandlers } from './socketGestion.js';
 import { Chat } from './chat.js';
+import { ClienToServerEvents, ServerToClientEvents } from './events.js';
 
 const pause = (ms: number) => new Promise(resolve => setTimeout(resolve, ms));
 
@@ -51,7 +52,7 @@ class Game {
 	}
 
 	setUpSocketListeners() {
-		this.socket.on('player-info', async (playerInfo: any) => {
+		this.socket.on(ServerToClientEvents.PLAYER_INFO, async (playerInfo: any) => {
 			
 			const { id, name } = JSON.parse(playerInfo?.player);
 			if(id == undefined || name == undefined) return console.error('player info not found while parsing', playerInfo);
@@ -99,7 +100,7 @@ class Game {
 			const input = document.getElementById('startScreen')?.querySelector('input');
 			if (!input) return console.error('input not found');
 
-			this.socket.send('enter-game', { name: input.value == '' ? 'no_name' : input.value });		
+			this.socket.send(ClienToServerEvents.ENTER_GAME, { name: input.value == '' ? 'no_name' : input.value });		
 		});
 	}
 
