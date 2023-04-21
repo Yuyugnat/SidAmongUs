@@ -2,8 +2,7 @@
 
 ## start golang server
 
-    linux/mac : `go run api/*.`
-    windows : /
+    windows/linux/mac : `go run api/*.`
 
 ## typscript
 
